@@ -1,0 +1,19 @@
+{
+  "name": "student-journal",
+  "version": "1.0.0",
+  "description": "Электронный журнал для учебных заведений",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dewo72d/student-journal-.git"
+  },
+  "author": "Dewo72d, Vishnevskyi, xPotter777",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dewo72d/student-journal-/issues"
+  },
+  "homepage": "https://github.com/Dewo72d/student-journal-#readme"
+}
