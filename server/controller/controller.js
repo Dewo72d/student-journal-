@@ -9,7 +9,8 @@ exports.testlog = (req, res) => {
 };
 
 exports.test = (req, res) => {
-  db.connection.query("SELECT * FROM prepod", (err, result) => {
+  let quer = "SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.value,lesson.Date FROM lesson,students WHERE YEAR(lesson.Date) = YEAR(CURRENT_DATE()) AND MONTH(lesson.Date) = MONTH(CURRENT_DATE()) AND lesson.studentId = students.id  ORDER BY Date ASC  "
+  db.connection.query(quer, (err, result) => {
     if (err) console.log(err);
     console.log(result);
     res.send(result);
