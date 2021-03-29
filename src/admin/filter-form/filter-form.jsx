@@ -8,9 +8,45 @@ import { makeStyles } from "@material-ui/core/styles";
 const useStyles = makeStyles((theme) => ({
   card: {
     backgroundColor: "yellow !important",
+    [theme.breakpoints.down("sm")]:{
+      display: "flex",
+      justifyContent: "space-between",
+      '& .MuiOutlinedInput-input':{
+        fontSize: 15,
+      },
+      '& Button':{
+        fontSize: 10,
+      }
+    },
+    [theme.breakpoints.up("md")]:{
+      display: "flex",
+      justifyContent: "space-between",
+    },
+    [theme.breakpoints.up("lg")]:{
+      justifyContent: "space-evently",
+      '& .MuiOutlinedInput-input':{
+        fontSize: 30,
+      },
+      '& Button':{
+        fontSize: 20,
+        height: 75
+      }
+    },
+    [theme.breakpoints.down("xs")]:{
+      display: "flex",
+      flexWrap: "wrap",
+      flexDirection: "column",
+      justifyContent: "center",
+      '& .MuiOutlinedInput-input':{
+        fontSize: 13,
+        marginBottom: 10,
+      },
+      '& Button':{
+        fontSize: 20,
+      }
+    }
   },
 }));
-
 const lessons = [
   {
     value: "1",
