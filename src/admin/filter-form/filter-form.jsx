@@ -1,9 +1,68 @@
-import React, { useState, useEffect } from "react";
-import Paper from "@material-ui/core/Paper";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import TextField from "@material-ui/core/TextField";
 import MenuItem from "@material-ui/core/MenuItem";
+import Button from "@material-ui/core/Button";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  card: {
+    [theme.breakpoints.down("xs")]: {
+      display: "flex",
+      flexWrap: "wrap",
+      flexDirection: "column",
+      justifyContent: "center",
+      gap: 10,
+      "& .MuiOutlinedInput-input": {
+        fontSize: 16,
+        marginBottom: 10,
+      },
+      "& Button": {
+        fontSize: 20,
+      },
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      display: "flex",
+      justifyContent: "space-between",
+      "& .MuiOutlinedInput-input": {
+        fontSize: 18,
+        hight: 20,
+      },
+      "& Button": {
+        fontSize: 10,
+      },
+    },
+
+    [theme.breakpoints.up("md")]: {
+      display: "flex",
+      justifyContent: "space-between",
+      "& #name": {
+        width: "20rem",
+      },
+    },
+
+    [theme.breakpoints.up("lg")]: {
+      justifyContent: "space-evently",
+      "& .MuiOutlinedInput-input": {
+        fontSize: 20,
+      },
+      "& Button": {
+        fontSize: 20,
+        height: 75,
+      },
+      "& #name": {
+        width: "25rem",
+      },
+    },
+  },
+}));
 
 const lessons = [
+  {
+    value: "0",
+    label: "Всі",
+  },
   {
     value: "1",
     label: "1",
@@ -23,33 +82,53 @@ const lessons = [
 ];
 
 function FilterForm() {
+  const classes = useStyles();
+  const { register, handleSubmit } = useForm(); // initialize the hook
   const [lesson, setLesson] = useState(lessons[0].value);
   const hendleChange = (event) => {
     setLesson(event.target.value);
   };
 
+  // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
+  const onSubmit = async (data) => {
+    console.log(Object.keys(data));
+    let formData = new FormData();
+
+    for (let key in data) {
+      formData.append(key, data[key]);
+    }
+
+    fetch("http://localhost:4000/api/selection", {
+      method: "POST",
+      mode: "cors",
+      body: formData,
+    })
+      .then((res) => {
+        console.log("done");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  // ----------------------------
+  const onErr = (err) => console.error(err);
+
   return (
-    <div>
-      <Paper>
-        <TextField type="number" id="group" label="Группа" variant="outlined" />
-        <TextField id="name" label="Имя" variant="outlined" />
-        <TextField
-          id="lesson"
-          select
-          label="Пара"
-          variant="outlined"
-          value={lesson}
-          onChange={hendleChange}
-        >
-          {lessons.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField type="date" id="date" variant="outlined" />
-      </Paper>
-    </div>
+    <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
+      <input ref={register} type="number" name="group" label="Группа" />
+      <input type="text" ref={register} name="name" />
+      <select ref={register} name="lesson">
+        {lessons.map((val) => (
+          <option key={val.value} value={val.value}>
+            {val.label}
+          </option>
+        ))}
+      </select>
+      <input ref={register} type="date" id="date" name="date" />
+      <Button variant="contained" color="primary" type="submit">
+        Відправити
+      </Button>
+    </form>
   );
 }
 
