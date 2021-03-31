@@ -9,7 +9,12 @@ exports.selection = (req, res) => {
   const date = req.body.date;
 
   console.log(group, name, lesson, date);
-  res.sendStatus(200);
+  let q = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.value FROM lesson,students WHERE lesson.lessonNumber=${lesson} `;
+  db.connection.query(q, (err, result) => {
+    if (err) console.log(err);
+    console.log(result);
+    res.send(result);
+  });
 };
 
 exports.test = (req, res) => {
