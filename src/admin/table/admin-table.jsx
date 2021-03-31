@@ -7,20 +7,10 @@ import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 
-function AdminTable() {
-  const [result, setResult] = useState([]);
+function AdminTable(props) {
+  const [result, setResult] = useState([]); //Выборка
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
   const columns = [
     { id: "group", label: "Група" },
     { id: "code", label: "Имя" },
@@ -28,19 +18,24 @@ function AdminTable() {
     { id: "mark", label: "Відмітка" },
   ];
 
+  //Отображение количества записей
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+
+    setPage(0);
+  };
+  //-------------------------
+
+  //Перерисовка на основе выборки
   useEffect(() => {
-    fetch("http://localhost:4000/api/test", {
-      method: "POST",
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        setResult(res);
-        console.log(result);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    setResult(props.selection);
+  }, [props.selection]);
+  //----------------------
+  console.log(result);
 
   return (
     <div>

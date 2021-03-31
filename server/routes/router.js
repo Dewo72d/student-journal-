@@ -6,6 +6,7 @@ const controller = require("../controller/controller");
 //const { jwtSecret } = require("../config/authConfig");
 
 router.use("/api/test", controller.test);
+router.use("/api/selection", controller.selection);
 
 app.use(function (err, req, res, next) {
   console.error(err.stack);
