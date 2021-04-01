@@ -16,7 +16,47 @@ exports.selection = (req, res) => {
     res.send(result);
   });
 };
-
+exports.insertingStudent = (req,res) =>{
+  const name = req.body.name;
+  const group = req.body.group;
+  let q = `INSERT INTO students (studentGroup,fullName) VALUES ('${group}','${name}')`;
+  console.log(group, name);
+  if (name === '' || group === '')
+  {
+    res.send('0');
+  }
+  else
+  {
+    db.connection.query(q, (err, result) => {
+      if (err) res.send('0');
+      res.send('1');
+    });
+  }
+}
+exports.deletingStudent = (req,res) =>{
+  const name = req.body.name;
+  const group = req.body.group;
+  let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+  console.log(group, name);
+  if (name === '' || group === '')
+  {
+    res.send('0');
+  }
+  else
+  {
+    db.connection.query(q, (err, result) => {
+      if (err) res.send('0')
+      res.send('1');
+    });
+  }
+}
+exports.uppdateStudent = (req,res) =>{
+  let selectGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
+  db.connection.query(selectGroup,(err,result)=>{
+    if (result.length === 0) res.send('0');
+    res.send('1');
+  })
+}
 exports.test = (req, res) => {
   let quer =
     "SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.value,lesson.Date FROM lesson,students WHERE YEAR(lesson.Date) = YEAR(CURRENT_DATE()) AND MONTH(lesson.Date) = MONTH(CURRENT_DATE()) AND lesson.studentId = students.id  ORDER BY Date ASC  ";
