@@ -93,7 +93,7 @@ function UppdateForm() {
             </IconButton>
           }
         >
-          <strong>Студента було додано</strong>
+          <strong>Помилка</strong>
         </Alert>
       </Collapse>
     </div>): result.length === 0 ?(<div></div>):(<div>
@@ -112,7 +112,7 @@ function UppdateForm() {
             </IconButton>
           }
         >
-          <strong>Студента було додано</strong>
+          <strong>Всі студенти переведені на наступний курс</strong>
         </Alert>
       </Collapse>
     </div>)}
