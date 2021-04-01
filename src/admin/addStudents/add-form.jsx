@@ -1,4 +1,3 @@
-
 import React, { useState} from "react";
 import { useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
@@ -65,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
 function AddForm() {
   const classes = useStyles();
   const { register, handleSubmit } = useForm(); // initialize the hook
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState([]);
   const [open,setOpen] = useState(false);
   const [alertopen, setAlertOpen] = useState(true);
   const handleOpen = () => {
@@ -89,7 +88,7 @@ function AddForm() {
       body: formData,
     })
       .then(async (res) => {
-        return await await res.text();
+        return await await res.json();
       })
       .then(async (res) => {
          return await setResult(res);
@@ -137,51 +136,49 @@ function AddForm() {
           Відправити
       </Button>
       </form>
-      <div className={classes.alert}>
-      {result === '0' ? (<div>
-      <Collapse in={alertopen}>
-        <Alert
-          severity="warning"
-          action={
-            <IconButton
-              aria-label="close" 
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setAlertOpen(false);
-              }}
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
-        >
-          <strong>Некоректні дані</strong>
-        </Alert>
-      </Collapse>
-    </div>): result.length === 0 ? (<Alert severity="info">
-  <AlertTitle>Info</AlertTitle>
-  <strong>Заповніть поля</strong>
-</Alert>) : result === '1' ?(<div>
-      <Collapse in={alertopen}>
-        <Alert
-          action={
-            <IconButton
-              aria-label="close" 
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setAlertOpen(false);
-              }}
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-          }
-        >
-          <strong>Студента було додано</strong>
-        </Alert>
-      </Collapse>
-    </div>): (<Alert severity="warning">
-  <AlertTitle>Warning</AlertTitle></Alert>)}
+      <div className={classes.alert}>{result.message == 'Ви не ввели студента чи групу' ? (<Alert severity="info">
+        <AlertTitle>Info</AlertTitle>
+        <strong>{result.message}</strong>
+      </Alert>) : result.message == 'Такий студент вже існує' ? (<div>
+        <Collapse in={alertopen}>
+          <Alert
+            severity="warning"
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setAlertOpen(false);
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <strong>{result.message}</strong>
+          </Alert>
+        </Collapse>
+      </div>) : result.message == 'Студента було додано' ? (<div>
+        <Collapse in={alertopen}>
+          <Alert
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setAlertOpen(false);
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <strong>{result.message}</strong>
+          </Alert>
+        </Collapse>
+      </div>) : (<div></div>)}
       </div>
     </div>
   );
