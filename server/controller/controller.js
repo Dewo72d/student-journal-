@@ -16,62 +16,70 @@ exports.selection = (req, res) => {
     res.send(result);
   });
 };
-exports.insertingStudent = (req,res) =>{
+exports.insertingStudent = (req, res) => {
   const name = req.body.name;
   const group = req.body.group;
   let q = `INSERT INTO students (studentGroup,fullName) VALUES ('${group}','${name}')`;
-  console.log(group, name);
-  if (name === '' || group === '')
-  {
-    res.send('0');
+  if (name === '' || group === '') {
+    res.status(200).json({
+      message: "Ви не ввели студента чи групу"
+    })
   }
-  else
-  {
-    db.connection.query(q, (err, result) => {
-      if (err) res.send('0');
-      res.send('1');
+  else {
+    let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+    db.connection.query(selectName, (err, result) => {
+      if (result.length > 0)
+        res.status(200).json({
+          message: "Такий студент вже існує"
+        })
+      else {
+        db.connection.query(q, (error, result2) => {
+          if (error) res.status(401).json({
+            message: "Помилка",
+          })
+          res.status(200).json({
+            message: "Студента було додано",
+          })
+        })
+      }
     });
   }
 }
-exports.deletingStudent = (req,res) =>{
+exports.deletingStudent = (req, res) => {
   const name = req.body.name;
   const group = req.body.group;
   console.log(group, name);
-  if (name.length == 0 || group.length == 0)
-  {
+  if (name.length == 0 || group.length == 0) {
     res.status(200).json({
       message: "Ви не ввели студента чи групу",
     })
   }
-  else
-  {
+  else {
     let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
     db.connection.query(selectName, (err, result) => {
-      if (result == 0)
-      {
+      if (result.length == 0) {
         res.status(200).json({
           message: "Такого студента немає",
         })
       }
-      else
-      {
-      let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
-      db.connection.query(q,(error,result2)=>{
-        if (error) res.status(401).json({
-          message: "Помилка",
+      else {
+        let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+        db.connection.query(q, (error, result2) => {
+          if (error) res.status(401).json({
+            message: "Помилка",
+          })
+          res.status(200).json({
+            message: "Студента було видалено",
+          })
         })
-        res.status(200).json({
-          message: "Студента було видалено",
-        })
-      })        
       }
     });
   }
 }
-exports.uppdateStudent = (req,res) =>{
+exports.uppdateStudent = (req, res) => {
   let selectGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
-  db.connection.query(selectGroup,(err,result)=>{
-    if (result.length === 0) res.send('0');
+  db.connection.query(selectGroup, (err, result) => {
+    if (result.length == 0) res.send('0');
     res.send('1');
   })
 }
