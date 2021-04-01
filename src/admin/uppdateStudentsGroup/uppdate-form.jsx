@@ -57,7 +57,8 @@ function UppdateForm() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Продовжити?"}</DialogTitle>
+        //Діалогове вікно, відкривається коли натискаю Button 'Відправити'
+        <DialogTitle id="alert-dialog-title">{"Продовжити?"}</DialogTitle>   
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Ви впевнені,що хочете перевести студентів на наступний курс?
@@ -75,6 +76,8 @@ function UppdateForm() {
       <Button className={classes.item} variant="contained" color="primary" onClick={handleOpen}>
           Відправити
       </Button>
+      //--------------------------------------
+      //Alert
       <div className={classes.alert}>
           {result.message === 'Помилка' ? (<div>
       <Collapse in={alertopen}>
@@ -117,6 +120,7 @@ function UppdateForm() {
       </Collapse>
     </div>)}
           </div>
+        /////////////////////
             </form>
         </div>
     )
