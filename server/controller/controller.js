@@ -36,17 +36,35 @@ exports.insertingStudent = (req,res) =>{
 exports.deletingStudent = (req,res) =>{
   const name = req.body.name;
   const group = req.body.group;
-  let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
   console.log(group, name);
-  if (name === '' || group === '')
+  if (name.length == 0 || group.length == 0)
   {
-    res.send('0');
+    res.status(200).json({
+      message: "Ви не ввели студента чи групу",
+    })
   }
   else
   {
-    db.connection.query(q, (err, result) => {
-      if (err) res.send('0')
-      res.send('1');
+    let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+    db.connection.query(selectName, (err, result) => {
+      if (result == 0)
+      {
+        res.status(200).json({
+          message: "Такого студента немає",
+        })
+      }
+      else
+      {
+      let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+      db.connection.query(q,(error,result2)=>{
+        if (error) res.status(401).json({
+          message: "Помилка",
+        })
+        res.status(200).json({
+          message: "Студента було видалено",
+        })
+      })        
+      }
     });
   }
 }
