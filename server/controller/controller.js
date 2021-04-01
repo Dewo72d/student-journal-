@@ -19,21 +19,21 @@ exports.selection = (req, res) => {
 exports.insertingStudent = (req, res) => {
   const name = req.body.name;
   const group = req.body.group;
-  let q = `INSERT INTO students (studentGroup,fullName) VALUES ('${group}','${name}')`;
+  let q = `INSERT INTO students (studentGroup,fullName) VALUES ('${group}','${name}')`;//шукаємо в БД чи є такий студент
   if (name === '' || group === '') {
     res.status(200).json({
       message: "Ви не ввели студента чи групу"
     })
   }
   else {
-    let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+    let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//шукаємо в БД чи є такий студент
     db.connection.query(selectName, (err, result) => {
       if (result.length > 0)
         res.status(200).json({
           message: "Такий студент вже існує"
         })
       else {
-        db.connection.query(q, (error, result2) => {
+        db.connection.query(q, (error, result2) => {//добавляємо в БД на основі вибірки
           if (error) res.status(401).json({
             message: "Помилка",
           })
@@ -55,7 +55,7 @@ exports.deletingStudent = (req, res) => {
     })
   }
   else {
-    let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+    let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//шукаємо в БД чи є такий студент
     db.connection.query(selectName, (err, result) => {
       if (result.length == 0) {
         res.status(200).json({
@@ -63,7 +63,7 @@ exports.deletingStudent = (req, res) => {
         })
       }
       else {
-        let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;
+        let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//видаляємо на основі вибірки
         db.connection.query(q, (error, result2) => {
           if (error) res.status(401).json({
             message: "Помилка",
@@ -77,10 +77,35 @@ exports.deletingStudent = (req, res) => {
   }
 }
 exports.uppdateStudent = (req, res) => {
-  let selectGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
-  db.connection.query(selectGroup, (err, result) => {
-    if (result.length == 0) res.send('0');
-    res.send('1');
+  let uppdateGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
+  let selectGroup = `SELECT * FROM students WHERE (studentGroup + 100) > 500`;
+  let deleteStudentGroup = `DELETE FROM students WHERE (students.studentGroup + 100) > 500`;
+  db.connection.query(selectGroup, (err, result) => {//шукаємо випускників
+    if (result.length > 0)
+    {
+      db.connection.query(deleteStudentGroup,(err2,result2)=>{//видаляємо їх
+        if (err2) 
+        {
+          console.log(err2);
+          res.status(404).json({
+            message:"Помилка"
+          })
+        }
+        else
+        {
+          db.connection.query(uppdateGroup,(err3,result3)=>{//переводимо інших на наступний курс
+           if (err) res.status(404).json({
+             message:"Помилка"
+           })
+           else{
+            res.status(200).json({
+              message:"Переведення успішно здійснено"
+            })
+           }
+          })
+        }
+      })
+    }
   })
 }
 exports.test = (req, res) => {
