@@ -13,7 +13,6 @@ function validator(checkFun, doOnTrue, doOnFalse) {
         return doOnFalse()
     }
 }
-
 //----------------------------
 
 exports.selection = (req, res) => {
@@ -21,21 +20,26 @@ exports.selection = (req, res) => {
     let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`)
     let group = validator(() => req.body.group === "", () => "", () => `AND students.studentGroup = ${req.body.group}`)
     let lesson = validator(() => req.body.lesson === "0", () => "", () => `AND lesson.lessonNumber = ${req.body.lesson}`)
+    let countA = 0;
+    let countP = 0;
     //------------------------------
     let sqlQuery = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.Date ,lesson.value FROM lesson,students WHERE ${date} AND lesson.studentId = students.id ${lesson} ${group} ${name} `;
     db.connection.query(sqlQuery, (err, result) => {
         if (err) console.log(err);
-        console.log(result);
+        // Счеткик присутствующих и отствующих
+        for (let i = 0; i < result.length; i++) {
+            if (result[i].value === "absent") {
+                countA += 1;
+            } else if (result[i].value === "present") {
+                countP += 1;
+            }
+        }
+        result.push({
+            countAbsent: countA,
+            countPresent: countP
+        })
+        //--Последний елемент в масиве всегда будет  объектом с ключами: countAbsent ,countPresent --
         res.send(result);
     });
 };
 
-exports.test = (req, res) => {
-    let quer =
-        "SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.value,lesson.Date FROM lesson,students WHERE YEAR(lesson.Date) = YEAR(CURRENT_DATE()) AND MONTH(lesson.Date) = MONTH(CURRENT_DATE()) AND lesson.studentId = students.id  ORDER BY Date ASC  ";
-    db.connection.query(quer, (err, result) => {
-        if (err) console.log(err);
-        console.log(result);
-        res.send(result);
-    });
-};
