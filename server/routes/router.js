@@ -5,11 +5,10 @@ const controller = require("../controller/controller");
 //const jwt = require("jsonwebtoken");
 //const { jwtSecret } = require("../config/authConfig");
 
-router.use("/api/test", controller.test);
 router.use("/api/selection", controller.selection);
 
-app.use(function (err, req, res, next) {
-  console.error(err.stack);
-  res.status(500).send("Something broke!");
+app.use(function (err, req, res) {
+    console.error(err.stack);
+    res.status(500).send("Something broke!");
 });
 module.exports = router;
