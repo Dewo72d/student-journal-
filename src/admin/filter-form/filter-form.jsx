@@ -83,11 +83,7 @@ const lessons = [
 function FilterForm() {
     const classes = useStyles();
     const {register, handleSubmit} = useForm(); // initialize the hook
-    const [lesson, setLesson] = useState(lessons[0].value);
     const [selection, setSelection] = useState([]);
-    const hendleChange = (event) => {
-        setLesson(event.target.value);
-    };
 
     const onSubmit = async (data) => {
         // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
@@ -96,6 +92,7 @@ function FilterForm() {
             formData.append(key, data[key]);
         }
         //--------------------------------
+
         //Отправка формы в бд на выборку
         await fetch("http://localhost:4000/api/selection", {
             method: "POST",
@@ -109,7 +106,7 @@ function FilterForm() {
                 return setSelection(res);
             })
             .catch((err) => {
-                throw console.error(err)
+                throw console.error(err);
             }, []);
     };
     //--------------------------------
