@@ -2,6 +2,10 @@ import React from "react";
 import FilterForm from "./filter-form/filter-form";
 import Paper from "@material-ui/core/Paper";
 import { Accordion, AccordionDetails, AccordionSummary, makeStyles, Typography } from "@material-ui/core";
+import AddForm from "./addStudents/add-form";
+import UppdateForm from "./uppdateStudentsGroup/uppdate-form"
+import DeleteForm from "./deleteStudents/delete-form";
+import AddStarostaForm from "./addStarosta/add-starosta-form"
 const useStyles = makeStyles({
   card:{
     display:"block"
@@ -24,6 +28,7 @@ function AdminPage() {
           <Typography>Вставка студентів</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
+          <AddForm/>
         </AccordionDetails>
       </Accordion>
       <Accordion>
@@ -31,6 +36,7 @@ function AdminPage() {
           <Typography>Перевід на новий курс</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
+          <UppdateForm/>
         </AccordionDetails>
       </Accordion>
       <Accordion>
@@ -38,6 +44,15 @@ function AdminPage() {
           <Typography>Видалення студентів</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
+          <DeleteForm/>
+        </AccordionDetails>
+      </Accordion>
+      <Accordion>
+        <AccordionSummary>
+          <Typography>Добавлення старост</Typography>
+        </AccordionSummary>
+        <AccordionDetails className={classes.card}>
+          <AddStarostaForm/>
         </AccordionDetails>
       </Accordion>
     </Paper>

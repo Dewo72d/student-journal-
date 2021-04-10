@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
-import TextField from "@material-ui/core/TextField";
-import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import AdminTable from "../table/admin-table";
 import { makeStyles } from "@material-ui/core/styles";
-
+import ReactToPrint from "react-to-print";
+import image from "../../img/print.webp"
 const useStyles = makeStyles((theme) => ({
   card: {
     [theme.breakpoints.down("xs")]: {
@@ -57,6 +56,9 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
+  image:{
+    width: "20px"
+  }
 }));
 
 const lessons = [
@@ -83,6 +85,8 @@ const lessons = [
 ];
 
 function FilterForm() {
+  debugger;
+  const componentRef = useRef();
   const classes = useStyles();
   const { register, handleSubmit } = useForm(); // initialize the hook
   const [lesson, setLesson] = useState(lessons[0].value);
@@ -119,7 +123,11 @@ function FilterForm() {
 
   return (
     <div>
-      <AdminTable selection={selection} />
+      //------
+      <div ref={componentRef}>
+      <AdminTable  selection={selection}/>
+      </div>
+      //-----
       <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
         <div>
           <label>Група</label>
@@ -146,6 +154,14 @@ function FilterForm() {
         <Button variant="contained" color="primary" type="submit">
           Відправити
         </Button>
+        <div>
+            //-----
+      <ReactToPrint
+        trigger={() => <Button variant="contained" color="secondary"><img src={image} alt="print" className={classes.image}/></Button>}
+        content={() => componentRef.current}
+      />
+            //-------
+    </div>
       </form>
     </div>
   );
