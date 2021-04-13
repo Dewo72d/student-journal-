@@ -15,9 +15,9 @@ import {makeStyles} from '@material-ui/core/styles';
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
+            {''}
             <Link color="inherit" href="/">
-                PiskaSosiska
+                КПЕК ЛНТУ
             </Link>{' '}
             {new Date().getFullYear()}
             {'.'}

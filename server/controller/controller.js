@@ -15,49 +15,27 @@ function validator(checkFun, doOnTrue, doOnFalse) {
     }
 }
 
-//----------------------------
+//---------------------------
 
-//----------НУЖЕН РЕФАКТОРИНГ-----НУЖЕН РЕФАКТОРИНГ-----НУЖЕН РЕФАКТОРИНГ----------
 
-//Добавление нового: админа,  препорда
-exports.addNewUser = (req, res) => {
-    const {fullName, login, password, role} = req.body;
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
-
-    db.connection.query(`SELECT * FROM ${role} WHERE login = ${login}`, (err, result) => {
-        if (result.length > 0) {
-            return (
-                res.status(401).json(
-                    `${new Error("Такий логін вже існує")}`
-                )
-            );
-        } else {
-            db.connection.query(`INSERT INTO ${role} (fullName,login, password) VALUES(${fullName}, ${login}, ${hash})`);
+//-------Проверка JWT------------
+/*
+ * Врезультате выполнения этого метода
+ * на фронте будет возвращатся страница
+ * равная роли или группе
+ */
+exports.testCookie = (req, res) => {
+    jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
+        res.set("Access-Control-Allow-Origin", req.headers.origin); //<<КОСТЫЛЬ!? << ООооХ, эти 2 строки что бы можно было отправлять статус коды.
+        res.set("Access-Control-Allow-Credentials", "true");        //<<КОСТЫЛЬ!? << Без них  CORS начитает ругатся, хотя он и без этого рукается.
+        if (err || typeof decode === "undefined") {
+            return res.status(401).json({message: "Unauthorized"});
         }
+        let {group, role} = jwt.decode(req.cookies.auth);
+        console.log(group, role);
+        return res.status(200).json({group: group, role});
     });
 };
-
-//Добавление нового старосты
-
-exports.addNewStarosta = (req, res) => {
-    const {fullName, group, login, password, role} = req.body;
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
-
-    db.connection.query(`SELECT * FROM ${role} WHERE login = ${login}`, (err, result) => {
-        if (result.length > 0) {
-            return (
-                res.status(401).json(
-                    `${new Error("Такий логін вже існує")}`
-                )
-            );
-        } else {
-            db.connection.query(`INSERT INTO ${role} (starostaName, Group, login, password) VALUES(${fullName},${group}, ${login}, ${hash})`);
-        }
-    });
-};
-//^^^^^^^^^^НУЖЕН РЕФАКТОРИНГ^^^^^^НУЖЕН РЕФАКТОРИНГ^^^^^^^НУЖЕН РЕФАКТОРИНГ^^^^^^^
 
 //Вход на сайт
 exports.login = (req, res) => {
@@ -65,32 +43,88 @@ exports.login = (req, res) => {
     if (!login || !password) return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
 
     db.connection.query(`SELECT * FROM ${role} WHERE login = ${login}`, (err, result) => {
-        if (err) console.log(err);
-        console.log(result);
+        if (err) return res.status(401).json(
+            `${new Error("Невірний  логін або пароль")}`
+        );
+
+        let group = result === undefined ? () => {
+            return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
+        } : typeof result[0].Group === "undefined" ? "0" : result[0].Group;
+
         if (result.length === 0) {
             res.status(401).json(
                 `${new Error("Невірний  логін або пароль")}`
             );
         } else {
-            const validPassword = bcrypt.compareSync(password, result[0].password);
-            if (validPassword) {
+            const hash = (password === result[0].password); // Сравниваем пароли
+            if (hash) {
                 jwt.sign(
                     {
                         name: result[0].fullName,
                         role: role,
+                        group: group
                     },
-                    {jwtSecret},
+                    Object.values(jwtSecret)[0],
                     {
-                        expiresIn: 60 * 60,
+                        expiresIn: 60 * 2,
                     },
                     (err, token) => {
                         if (err) throw new Error(err);
-                        res.status(200).cookie("auth", `${token}`);
+                        res.cookie("auth", `${token}`, {httpOnly: true});
+                        res.redirect("http://localhost:3000/");// БЕЗ ЭТОГО КУКА НЕ ОТПРАВЛЯЕТСЯ
                     });
+
+            } else {
+                return res.status(401).json(
+                    `${new Error("Невірний  логін або пароль")}`
+                );
             }
+
+
         }
     });
 };
+
+
+//----------НУЖЕН РЕФАКТОРИНГ-----НУЖЕН РЕФАКТОРИНГ-----НУЖЕН РЕФАКТОРИНГ----------
+
+//Добавление нового: админа,  препорда
+exports.addNewUser = (req, res) => {
+    const {fullName, login, password, role} = req.body;
+
+
+    db.connection.query(`SELECT * FROM ${role} WHERE login = ${login}`, (err, result) => {
+        if (result.length > 0) {
+            return (
+                res.status(401).json(
+                    `${new Error("Такий логін вже існує")}`
+                )
+            );
+        } else {
+            db.connection.query(`INSERT INTO ${role} (fullName,login, password) VALUES(${fullName}, ${login}, ${password})`);
+            /*???????????????????????????*/
+        }
+    });
+};
+//Добавление нового старосты
+exports.addNewStarosta = (req, res) => {
+    const {fullName, group, login, password, role} = req.body;
+
+    db.connection.query(`SELECT * FROM ${role} WHERE login = ${login}`, (err, result) => {
+        if (result.length > 0) {
+            return (
+                res.status(401).json(
+                    `${new Error("Такий логін вже існує")}`
+                )
+            );
+        } else {
+            db.connection.query(`INSERT INTO ${role} (starostaName, Group, login, password) VALUES(${fullName},${group}, ${login}, ${password})`);
+            /*???????????????????????????*/
+        }
+    });
+};
+
+//^^^^^^^^^^НУЖЕН РЕФАКТОРИНГ^^^^^^НУЖЕН РЕФАКТОРИНГ^^^^^^^НУЖЕН РЕФАКТОРИНГ^^^^^^^
 
 
 //Выборка в админке
@@ -212,6 +246,8 @@ exports.uppdateStudent = (req, res) => {
         }
     });
 };
+
+//Добавление нового студента
 exports.insertingStudent = (req, res) => {
     const name = req.body.name;
     const group = req.body.group;
@@ -240,6 +276,7 @@ exports.insertingStudent = (req, res) => {
         });
     }
 };
+// Ужадение студента
 exports.deletingStudent = (req, res) => {
     const name = req.body.name;
     const group = req.body.group;
@@ -258,9 +295,12 @@ exports.deletingStudent = (req, res) => {
             } else {
                 let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//видаляємо на основі вибірки
                 db.connection.query(q, (error, result) => {
-                    if (error) res.status(401).json({
-                        message: "Помилка",
-                    });
+                    if (error) {
+                        console.log(error);
+                        res.status(500).json({
+                            message: "Помилка",
+                        });
+                    }
                     res.status(200).json({
                         message: "Студента було видалено",
                     });
@@ -269,6 +309,8 @@ exports.deletingStudent = (req, res) => {
         });
     }
 };
+
+//Перевод на новый курс
 exports.uppdateStudent = (req, res) => {
     let uppdateGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
     let selectGroup = `SELECT * FROM students WHERE (studentGroup + 100) > 500`;

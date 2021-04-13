@@ -35,11 +35,10 @@ function AdminTable() {
 
     //Перерисовка на основе выборки
     useEffect(() => {
-
         setResult([{studentGroup: 412, lessonNumber: 2, fullName: "Piska", value: "absent"}, {
             studentGroup: 412,
             lessonNumber: 2,
-            fullName: "Piska",
+            fullName: "Name Name Full",
             value: "absent"
         }, {studentGroup: 412, lessonNumber: 2, fullName: "Piska", value: "absent"}]);
     }, []);

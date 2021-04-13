@@ -98,6 +98,7 @@ function FilterForm() {
             method: "POST",
             mode: "cors",
             body: formData,
+
         })
             .then(async (res) => {
                 return await res.json();
