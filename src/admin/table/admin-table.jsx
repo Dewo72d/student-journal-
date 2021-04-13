@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -6,18 +6,22 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-
-
+import ReactToExcel from "react-html-table-to-excel"
+import image from "../../img/print.webp"
+import ReactToPrint from "react-to-print";
+import "../../App.css"
+import { Button } from "@material-ui/core";
 function AdminTable(props) {
+    const componentRef = useRef();
     const [result, setResult] = useState([]); //Выборка
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const columns = [
-        {id: "group", label: "Група"},
-        {id: "code", label: "Имя"},
-        {id: "lesson", label: "Пара №"},
-        {id: "mark", label: "Відмітка"},
-        {id: "date", label: "Дата"},
+        { id: "group", label: "Група" },
+        { id: "code", label: "Имя" },
+        { id: "lesson", label: "Пара №" },
+        { id: "mark", label: "Відмітка" },
+        { id: "date", label: "Дата" },
     ];
 
     //Отображение количества записей
@@ -42,14 +46,14 @@ function AdminTable(props) {
     return (
         <div>
             <TableContainer>
-                <Table stickyHeader aria-label="sticky table">
+                <Table stickyHeader aria-label="sticky table" id="table-to-xls" ref={componentRef}>
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
                                 <TableCell
                                     key={column.id}
                                     align={column.align}
-                                    style={{minWidth: column.minWidth}}
+                                    style={{ minWidth: column.minWidth }}
                                 >
                                     {column.label}
                                 </TableCell>
@@ -103,6 +107,18 @@ function AdminTable(props) {
                 <p>Відсутніх - {result.map(i => i.countAbsent)}</p>
                 <p>Присутніх - {result.map(i => i.countPresent)}</p>
             </div>
+            <ReactToExcel
+                className="download-table-xls-button"
+                table="table-to-xls"
+                filename="excelFile"
+                sheet="sheet 1"
+                buttonText="Excel"
+            />
+            <br/>
+              <ReactToPrint
+        trigger={() => <Button variant="contained" color="secondary"><img src={image} alt="print" className="image"/></Button>}
+        content={() => componentRef.current}
+      />
         </div>
     );
 }

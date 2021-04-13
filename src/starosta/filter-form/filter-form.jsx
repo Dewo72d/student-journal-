@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
-import AdminTable from "../table/admin-table";
 import { makeStyles } from "@material-ui/core/styles";
+import StarostaTable from "../table/starosta-table";
 const useStyles = makeStyles((theme) => ({
   card: {
     [theme.breakpoints.down("xs")]: {
@@ -102,7 +102,7 @@ function FilterForm() {
     }
     //--------------------------------
     //Отправка формы в бд на выборку
-    await fetch("http://localhost:4000/api/selection", {
+    await fetch("http://localhost:4000/api/setstudents", {
       method: "POST",
       mode: "cors",
       body: formData,
@@ -122,29 +122,11 @@ function FilterForm() {
 
   return (
     <div>
-      <AdminTable  selection={selection}/>
+      <StarostaTable selection={selection}/>
       <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
         <div>
           <label>Група</label>
           <input ref={register} type="number" name="group" />
-        </div>
-        <div>
-          <label>ПІП</label>
-          <input type="text" ref={register} name="name" />
-        </div>
-        <div>
-          <label>Пара</label>
-          <select ref={register} name="lesson">
-            {lessons.map((val) => (
-              <option key={val.value} value={val.value}>
-                {val.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label>Дата</label>
-          <input ref={register} type="date" id="date" name="date" />
         </div>
         <Button variant="contained" color="primary" type="submit">
           Відправити

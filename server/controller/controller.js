@@ -44,7 +44,66 @@ exports.selection = (req, res) => {
         res.send(result);
     });
 };
-
+exports.students = (req,res) =>{
+  let group = req.body.group;
+  let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
+  db.connection.query(sql,(err,result)=>{
+    if (err) res.status(500).json({
+      message:"Помилка"
+    })
+    res.send(result);
+  })
+}
+exports.marking = (req,res) =>{
+const name = req.body.mark;
+const group = req.body.group;
+const lesson = req.body.lesson;
+let today = new Date().toISOString().slice(0,10);
+let sql = `SELECT * FROM students WHERE studentGroup = '${group[0]}'`
+db.connection.query(sql,(err,result)=>{
+  if (err) console.log(err);
+  for (let i = 0; i < result.length; i++)
+  {
+    let present = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','present','${today}')`;
+    let absent = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','absent','${today}')`;
+    if (Array.isArray(name))
+    {
+      if (name[i] == result[i].fullName)
+    {
+      db.connection.query(present,(err_present,result_present)=>{
+        if (err) console.log(err_present);
+        console.log(result_present);
+      })
+    }
+    else
+    {
+      db.connection.query(absent,(err_absent,result_absent)=>{
+        if (err) console.log(err_absent);
+        console.log(result_absent);
+      })
+    }
+    }
+    else
+    {
+      if (name == result[i].fullName)
+      {
+        db.connection.query(present,(err_present,result_present)=>{
+          if (err) console.log(err_present);
+          console.log(result_present);
+        })
+      }
+      else
+      {
+        db.connection.query(absent,(err_absent,result_absent)=>{
+          if (err) console.log(err_absent);
+          console.log(result_absent);
+        })
+      }
+    }
+  }
+  })
+res.redirect("http://localhost:3000/teacher");
+}
 //Добавление новго студента в админке
 exports.insertingStudent = (req, res) => {
     const name = req.body.name;
