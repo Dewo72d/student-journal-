@@ -85,7 +85,36 @@ const lessons = [
 ];
 
 function FilterForm() {
-  debugger;
+
+    const classes = useStyles();
+    const {register, handleSubmit} = useForm(); // initialize the hook
+    const [selection, setSelection] = useState([]);
+
+    const onSubmit = async (data) => {
+        // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
+        let formData = new FormData();
+        for (let key in data) {
+            formData.append(key, data[key]);
+        }
+        //--------------------------------
+
+        //Отправка формы в бд на выборку
+        await fetch("http://localhost:4000/api/selection", {
+            method: "POST",
+            mode: "cors",
+            body: formData,
+
+        })
+            .then(async (res) => {
+                return await res.json();
+            })
+            .then((res) => {
+                return setSelection(res);
+            })
+            .catch((err) => {
+                throw console.error(err);
+            }, []);
+    };
   const componentRef = useRef();
   const classes = useStyles();
   const { register, handleSubmit } = useForm(); // initialize the hook
