@@ -1,0 +1,17 @@
+.download-table-xls-button
+{
+  background-color: darkgreen;
+  color: white;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: right;
+}
+.image{
+  width:20px;
+}
+button.MuiButton-containedSecondary{
+  margin-top: 5px;
+  margin-bottom: 10px;
+  text-align: right;
+}

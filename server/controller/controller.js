@@ -340,16 +340,15 @@ exports.uppdateStudent = (req, res) => {
     });
 };
 
-    })
-}
 // Добавлення старости групи
 exports.insertingStarosta = (req, res) => {
   const name = req.body.name;
   const group = req.body.group;
   let select_id = `SELECT id FROM students WHERE fullName = '${name}' AND studentGroup = '${group}'`;
   let check = `SELECT * FROM starosta WHERE starostaGroup = '${group}'`;
-  if (name.length == 0 && group.length == 0) { 
-    res.status(401).json({
+
+  if (name.length == 0 || group.length == 0) { 
+    res.status(500).json({
       message: "Ви не ввели студента",
     })
   }
@@ -358,7 +357,7 @@ exports.insertingStarosta = (req, res) => {
       if (result_check == 0) { // якщо в групі ше немає старости, то добавляю
         db.connection.query(select_id, (error, result_select) => {  // шукаю його id, якщо є такий студент
           if (result_select.length == 0) {
-            res.status(401).json({
+            res.status(500).json({
               message: "Такої групи або студента не існує"
             })
           }
@@ -366,7 +365,7 @@ exports.insertingStarosta = (req, res) => {
             let query = `INSERT INTO starosta (starostaName,starostaGroup) VALUES ('${result_select[0].id}','${group}')`; // добавляю старосту в групу
             db.connection.query(query, (err, result) => {
               if (err) {
-                res.status(401).json({
+                res.status(500).json({
                   message: "Помилка"
                 })
               }
@@ -383,7 +382,7 @@ exports.insertingStarosta = (req, res) => {
       else {
         db.connection.query(select_id, (error, result_select) => { // якщо в групі вже є староста
           if (result_select.length == 0) {
-            res.status(401).json({
+            res.status(500).json({
               message: "Такої групи або студента не існує"
             })
           }
@@ -391,7 +390,7 @@ exports.insertingStarosta = (req, res) => {
             let query = `UPDATE starosta SET starostaName = '${result_select[0].id}' WHERE starostaGroup IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`; // обновлюю, старосту групи
             db.connection.query(query, (err, result) => {
               if (err) {
-                res.status(401).json({
+                res.status(500).json({
                   message: "Помилка"
                 })
               }

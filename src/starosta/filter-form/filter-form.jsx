@@ -1,11 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
-import AdminTable from "../table/admin-table";
 import { makeStyles } from "@material-ui/core/styles";
-import ReactToPrint from "react-to-print";
-import image from "../../img/print.webp"
-
+import StarostaTable from "../table/starosta-table";
 const useStyles = makeStyles((theme) => ({
   card: {
     [theme.breakpoints.down("xs")]: {
@@ -63,9 +60,6 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  image:{
-    width: "20px"
-  }
 }));
 
 const lessons = [
@@ -92,9 +86,6 @@ const lessons = [
 ];
 
 function FilterForm() {
-
-
-  const componentRef = useRef();
   const classes = useStyles();
   const { register, handleSubmit } = useForm(); // initialize the hook
   const [lesson, setLesson] = useState(lessons[0].value);
@@ -111,7 +102,7 @@ function FilterForm() {
     }
     //--------------------------------
     //Отправка формы в бд на выборку
-    await fetch("http://localhost:4000/api/selection", {
+    await fetch("http://localhost:4000/api/setstudents", {
       method: "POST",
       mode: "cors",
       body: formData,
@@ -131,43 +122,15 @@ function FilterForm() {
 
   return (
     <div>
-      <div ref={componentRef}>
-        <AdminTable  selection={selection}/>
-      </div>
+      <StarostaTable selection={selection}/>
       <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
         <div>
           <label>Група</label>
           <input ref={register} type="number" name="group" />
         </div>
-        <div>
-          <label>ПІП</label>
-          <input type="text" ref={register} name="name" />
-        </div>
-        <div>
-          <label>Пара</label>
-          <select ref={register} name="lesson">
-            {lessons.map((val) => (
-              <option key={val.value} value={val.value}>
-                {val.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label>Дата</label>
-          <input ref={register} type="date" id="date" name="date" />
-        </div>
         <Button variant="contained" color="primary" type="submit">
           Відправити
         </Button>
-        <div>
-            //-----
-      <ReactToPrint
-        trigger={() => <Button variant="contained" color="secondary"><img src={image} alt="print" className={classes.image}/></Button>}
-        content={() => componentRef.current}
-      />
-            //-------
-    </div>
       </form>
     </div>
   );
