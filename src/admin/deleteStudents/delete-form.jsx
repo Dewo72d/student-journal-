@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function AddForm() {
+function DeleteForm() {
     const classes = useStyles();
     const {register, handleSubmit} = useForm(); // initialize the hook
     const [result, setResult] = useState([]);
@@ -194,4 +194,4 @@ function AddForm() {
     );
 }
 
-export default AddForm;
+export default DeleteForm;
