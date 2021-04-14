@@ -11,8 +11,10 @@ import image from "../../img/print.webp"
 import ReactToPrint from "react-to-print";
 import "../../App.css"
 import { Button } from "@material-ui/core";
+
 function AdminTable(props) {
     const componentRef = useRef();
+
     const [result, setResult] = useState([]); //Выборка
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);

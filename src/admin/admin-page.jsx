@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import FilterForm from "./filter-form/filter-form";
 import Paper from "@material-ui/core/Paper";
-import { Accordion, AccordionDetails, AccordionSummary, makeStyles, Typography } from "@material-ui/core";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  makeStyles,
+  Typography,
+} from "@material-ui/core";
 import AddForm from "./addStudents/add-form";
-import UppdateForm from "./uppdateStudentsGroup/uppdate-form"
+import UppdateForm from "./uppdateStudentsGroup/uppdate-form";
 import DeleteForm from "./deleteStudents/delete-form";
-import AddStarostaForm from "./addStarosta/add-starosta-form"
+import AddStarostaForm from "./addStarosta/add-starosta-form";
+
 const useStyles = makeStyles({
-  card:{
-    display:"block"
-}
-})
+  card: {
+    display: "block",
+  },
+});
+
 function AdminPage() {
   const classes = useStyles();
   return (
@@ -28,7 +36,7 @@ function AdminPage() {
           <Typography>Вставка студентів</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
-          <AddForm/>
+          <AddForm />
         </AccordionDetails>
       </Accordion>
       <Accordion>
@@ -36,7 +44,7 @@ function AdminPage() {
           <Typography>Перевід на новий курс</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
-          <UppdateForm/>
+          <UppdateForm />
         </AccordionDetails>
       </Accordion>
       <Accordion>
@@ -44,7 +52,7 @@ function AdminPage() {
           <Typography>Видалення студентів</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
-          <DeleteForm/>
+          <DeleteForm />
         </AccordionDetails>
       </Accordion>
       <Accordion>
@@ -52,10 +60,11 @@ function AdminPage() {
           <Typography>Добавлення старост</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.card}>
-          <AddStarostaForm/>
+          <AddStarostaForm />
         </AccordionDetails>
       </Accordion>
     </Paper>
   );
 }
+
 export default AdminPage;
