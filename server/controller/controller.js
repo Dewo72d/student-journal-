@@ -1,7 +1,6 @@
 const db = require("../database/database");
 const jwt = require("jsonwebtoken");
 const {jwtSecret} = require("../config/authConfig");
-const bcrypt = require("bcrypt");
 
 // Эта функция для проверки типов ну или чего либо.
 //Принимает только функции.
@@ -14,9 +13,6 @@ function validator(checkFun, doOnTrue, doOnFalse) {
         return doOnFalse();
     }
 }
-
-//---------------------------
-
 
 //-------Проверка JWT------------
 /*
@@ -70,6 +66,7 @@ exports.login = (req, res) => {
                     },
                     (err, token) => {
                         if (err) throw new Error(err);
+
                         res.cookie("auth", `${token}`, {httpOnly: true});
                         res.redirect("http://localhost:3000/");// БЕЗ ЭТОГО КУКА НЕ ОТПРАВЛЯЕТСЯ
                     });
@@ -186,37 +183,6 @@ exports.insertingStudent = (req, res) => {
     }
 };
 
-//Удаление студенда в админке
-exports.deletingStudent = (req, res) => {
-    const name = req.body.name;
-    const group = req.body.group;
-    console.log(group, name);
-    if (name.length === 0 || group.length === 0) {
-        res.status(200).json({
-            message: "Ви не ввели студента чи групу",
-        });
-    } else {
-        let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//шукаємо в БД чи є такий студент
-        db.connection.query(selectName, (err, result) => {
-            if (result.length === 0) {
-                res.status(200).json({
-                    message: "Такого студента немає",
-                });
-            } else {
-                let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//видаляємо на основі вибірки
-                db.connection.query(q, (error, result2) => {
-                    if (error) res.status(500).json({
-                        message: `Помилка - ${result2}`,
-                    });
-                    res.status(200).json({
-                        message: "Студента було видалено",
-                    });
-                });
-            }
-        });
-    }
-};
-
 //Перевод студентов на новый курс в админке
 exports.uppdateStudent = (req, res) => {
     let updateGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
@@ -247,36 +213,7 @@ exports.uppdateStudent = (req, res) => {
     });
 };
 
-//Добавление нового студента
-exports.insertingStudent = (req, res) => {
-    const name = req.body.name;
-    const group = req.body.group;
-    let q = `INSERT INTO students (studentGroup,fullName) VALUES ('${group}','${name}')`;//шукаємо в БД чи є такий студент
-    if (name === '' || group === '') {
-        res.status(200).json({
-            message: "Ви не ввели студента чи групу"
-        });
-    } else {
-        let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//шукаємо в БД чи є такий студент
-        db.connection.query(selectName, (err, result) => {
-            if (result.length > 0)
-                res.status(200).json({
-                    message: "Такий студент вже існує"
-                });
-            else {
-                db.connection.query(q, (error, result) => {//добавляємо в БД на основі вибірки
-                    if (error) res.status(401).json({
-                        message: "Помилка",
-                    });
-                    res.status(200).json({
-                        message: "Студента було додано",
-                    });
-                });
-            }
-        });
-    }
-};
-// Ужадение студента
+// Удаление студента
 exports.deletingStudent = (req, res) => {
     const name = req.body.name;
     const group = req.body.group;
@@ -310,101 +247,119 @@ exports.deletingStudent = (req, res) => {
     }
 };
 
-//Перевод на новый курс
-exports.uppdateStudent = (req, res) => {
-    let uppdateGroup = `UPDATE students SET students.studentGroup = students.studentGroup + 100 WHERE (students.studentGroup + 100) < 500`;
-    let selectGroup = `SELECT * FROM students WHERE (studentGroup + 100) > 500`;
-    let deleteStudentGroup = `DELETE FROM students WHERE (students.studentGroup + 100) > 500`;
-    db.connection.query(selectGroup, (err, result) => {//шукаємо випускників
-        if (result.length > 0) {
-            db.connection.query(deleteStudentGroup, (err2, result) => {//видаляємо їх
-                if (err2) {
-                    console.log(err2);
-                    res.status(404).json({
-                        message: "Помилка"
-                    });
-                } else {
-                    db.connection.query(uppdateGroup, (err, result) => {//переводимо інших на наступний курс
-                        if (err) res.status(404).json({
-                            message: "Помилка"
+//Отметки
+exports.marking = (req, res) => {
+    const name = req.body.mark;
+    const group = req.body.group;
+    const lesson = req.body.lesson;
+    let today = new Date().toISOString().slice(0, 10);
+    let sql = `SELECT * FROM students WHERE studentGroup = '${group[0]}'`;
+    db.connection.query(sql, (err, result) => {
+            if (err) console.log(err);
+            for (let i = 0; i < result.length; i++) {
+                let present = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','present','${today}')`;
+                let absent = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','absent','${today}')`;
+                if (Array.isArray(name)) {
+                    if (name[i] === result[i].fullName) {
+                        db.connection.query(present, (err_present, result_present) => {
+                            if (err) console.log(err_present);
+                            console.log(result_present);
                         });
-                        else {
-                            res.status(200).json({
-                                message: "Переведення успішно здійснено"
-                            });
+                    } else {
+                        db.connection.query(absent, (err_absent, result_absent) => {
+                            if (err) console.log(err_absent);
+                            console.log(result_absent);
+                        });
+                    }
+                } else {
+                    if (name === result[i].fullName) {
+                        db.connection.query(present, (err_present, result_present) => {
+                            if (err) console.log(err_present);
+                            console.log(result_present);
+                        });
+                    } else {
+                        db.connection.query(absent, (err_absent, result_absent) => {
+                            if (err) console.log(err_absent);
+                            console.log(result_absent);
+                        });
+                    }
+                }
+            }
+            res.redirect("http://localhost:3000/teacher");
+        }
+    );
+
+
+// Добавлення старости групи
+    exports.insertingStarosta = (req, res) => {
+        const name = req.body.name;
+        const group = req.body.group;
+        let select_id = `SELECT id FROM students WHERE fullName = '${name}' AND studentGroup = '${group}'`;
+        let check = `SELECT * FROM starosta WHERE starostaGroup = '${group}'`;
+
+        if (name.length === 0 || group.length === 0) {
+            res.status(500).json({
+                message: "Ви не ввели студента",
+            });
+        } else {
+            db.connection.query(check, (err_check, result_check) => { // шукаю чи є такий студент і група
+                if (result_check === 0) { // якщо в групі ше немає старости, то добавляю
+                    db.connection.query(select_id, (error, result_select) => {  // шукаю його id, якщо є такий студент
+                            if (result_select.length === 0) {
+                                res.status(500).json({
+                                    message: "Такої групи або студента не існує"
+                                });
+                            } else {
+                                let query = `INSERT INTO starosta (starostaName,starostaGroup) VALUES ('${result_select[0].id}','${group}')`; // добавляю старосту в групу
+                                db.connection.query(query, (err, result) => {
+                                    if (err) {
+                                        res.status(500).json({
+                                            message: "Помилка"
+                                        });
+                                    } else {
+                                        res.status(200).json({
+                                            message: "Старосту було добавлено"
+                                        });
+                                    }
+                                });
+                            }
                         }
-                    });
+                    );
+                } else {
+                    db.connection.query(select_id, (error, result_select) => { // якщо в групі вже є староста
+                            if (result_select.length === 0) {
+                                res.status(500).json({
+                                    message: "Такої групи або студента не існує"
+                                });
+                            } else {
+                                let query = `UPDATE starosta SET starostaName = '${result_select[0].id}' WHERE starostaGroup IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`; // обновлюю, старосту групи
+                                db.connection.query(query, (err, result) => {
+                                    if (err) {
+                                        res.status(500).json({
+                                            message: "Помилка"
+                                        });
+                                    } else {
+                                        res.status(200).json({
+                                            message: "Старосту було добавлено"
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    );
                 }
             });
         }
-    });
+    };
 };
 
-// Добавлення старости групи
-exports.insertingStarosta = (req, res) => {
-  const name = req.body.name;
-  const group = req.body.group;
-  let select_id = `SELECT id FROM students WHERE fullName = '${name}' AND studentGroup = '${group}'`;
-  let check = `SELECT * FROM starosta WHERE starostaGroup = '${group}'`;
-
-  if (name.length == 0 || group.length == 0) { 
-    res.status(500).json({
-      message: "Ви не ввели студента",
-    })
-  }
-  else {
-    db.connection.query(check, (err_check, result_check) => { // шукаю чи є такий студент і група
-      if (result_check == 0) { // якщо в групі ше немає старости, то добавляю
-        db.connection.query(select_id, (error, result_select) => {  // шукаю його id, якщо є такий студент
-          if (result_select.length == 0) {
-            res.status(500).json({
-              message: "Такої групи або студента не існує"
-            })
-          }
-          else {
-            let query = `INSERT INTO starosta (starostaName,starostaGroup) VALUES ('${result_select[0].id}','${group}')`; // добавляю старосту в групу
-            db.connection.query(query, (err, result) => {
-              if (err) {
-                res.status(500).json({
-                  message: "Помилка"
-                })
-              }
-              else {
-                res.status(200).json({
-                  message: "Старосту було добавлено"
-                })
-              }
-            })
-          }
-        }
-        )
-      }
-      else {
-        db.connection.query(select_id, (error, result_select) => { // якщо в групі вже є староста
-          if (result_select.length == 0) {
-            res.status(500).json({
-              message: "Такої групи або студента не існує"
-            })
-          }
-          else {
-            let query = `UPDATE starosta SET starostaName = '${result_select[0].id}' WHERE starostaGroup IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`; // обновлюю, старосту групи
-            db.connection.query(query, (err, result) => {
-              if (err) {
-                res.status(500).json({
-                  message: "Помилка"
-                })
-              }
-              else {
-                res.status(200).json({
-                  message: "Старосту було добавлено"
-                })
-              }
-            })
-          }
-        }
-        )
-      }
-    })
-  }
-}
-//
+exports.students = (req, res) => {
+    let group = req.body.group;
+    let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
+    db.connection.query(sql, (err, result) => {
+        if (err) res.status(500).json({
+            message: "Помилка"
+        });
+        res.send(result);
+    });
+};
