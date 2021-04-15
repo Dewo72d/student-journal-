@@ -3,8 +3,6 @@ import { useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
 import AdminTable from "../table/admin-table";
 import { makeStyles } from "@material-ui/core/styles";
-import ReactToPrint from "react-to-print";
-import image from "../../img/print.webp"
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -63,9 +61,6 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  image:{
-    width: "20px"
-  }
 }));
 
 const lessons = [
@@ -160,14 +155,6 @@ function FilterForm() {
         <Button variant="contained" color="primary" type="submit">
           Відправити
         </Button>
-        <div>
-            //-----
-      <ReactToPrint
-        trigger={() => <Button variant="contained" color="secondary"><img src={image} alt="print" className={classes.image}/></Button>}
-        content={() => componentRef.current}
-      />
-            //-------
-    </div>
       </form>
     </div>
   );

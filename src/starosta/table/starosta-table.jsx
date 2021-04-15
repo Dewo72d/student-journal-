@@ -17,7 +17,6 @@ function StarostaTable(props) {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const columns = [
-        { id: "group", label: "Група" },
         { id: "code", label: "Имя" },
     ];
     const lessons = [
