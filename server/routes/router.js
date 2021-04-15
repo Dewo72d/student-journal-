@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const router = express.Router();
 const controller = require("../controller/controller");
-const controllerCheck = require("../controller/controllerCheck");
 
 router.use("/api/cookie", controller.testCookie);
 router.use("/api/selection", controller.selection);
