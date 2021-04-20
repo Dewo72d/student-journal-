@@ -217,28 +217,27 @@ exports.uppdateStudent = (req, res) => {
 exports.deletingStudent = (req, res) => {
     const name = req.body.name;
     const group = req.body.group;
-    console.log(group, name);
     if (name.length === 0 || group.length === 0) {
-        res.status(200).json({
+        return res.status(200).json({
             message: "Ви не ввели студента чи групу",
         });
     } else {
         let selectName = `SELECT * FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//шукаємо в БД чи є такий студент
         db.connection.query(selectName, (err, result) => {
             if (result.length === 0) {
-                res.status(200).json({
+                return res.status(200).json({
                     message: "Такого студента немає",
                 });
             } else {
                 let q = `DELETE FROM students WHERE studentGroup = '${group}' AND fullName = '${name}'`;//видаляємо на основі вибірки
                 db.connection.query(q, (error, result) => {
                     if (error) {
-                        console.log(error);
-                        res.status(500).json({
+                        console.log(error, result);
+                        return res.status(500).json({
                             message: "Помилка",
                         });
                     }
-                    res.status(200).json({
+                    return res.status(200).json({
                         message: "Студента було видалено",
                     });
                 });
@@ -288,78 +287,54 @@ exports.marking = (req, res) => {
             res.redirect("http://localhost:3000/teacher");
         }
     );
-
-
-// Добавлення старости групи
-    exports.insertingStarosta = (req, res) => {
-        const name = req.body.name;
-        const group = req.body.group;
-        let select_id = `SELECT id FROM students WHERE fullName = '${name}' AND studentGroup = '${group}'`;
-        let check = `SELECT * FROM starosta WHERE starostaGroup = '${group}'`;
-
-        if (name.length === 0 || group.length === 0) {
-            res.status(500).json({
-                message: "Ви не ввели студента",
-            });
-        } else {
-            db.connection.query(check, (err_check, result_check) => { // шукаю чи є такий студент і група
-                if (result_check === 0) { // якщо в групі ше немає старости, то добавляю
-                    db.connection.query(select_id, (error, result_select) => {  // шукаю його id, якщо є такий студент
-                            if (result_select.length === 0) {
-                                res.status(500).json({
-                                    message: "Такої групи або студента не існує"
-                                });
-                            } else {
-                                let query = `INSERT INTO starosta (starostaName,starostaGroup) VALUES ('${result_select[0].id}','${group}')`; // добавляю старосту в групу
-                                db.connection.query(query, (err, result) => {
-                                    if (err) {
-                                        res.status(500).json({
-                                            message: "Помилка"
-                                        });
-                                    } else {
-                                        res.status(200).json({
-                                            message: "Старосту було добавлено"
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    );
-                } else {
-                    db.connection.query(select_id, (error, result_select) => { // якщо в групі вже є староста
-                            if (result_select.length === 0) {
-                                res.status(500).json({
-                                    message: "Такої групи або студента не існує"
-                                });
-                            } else {
-                                let query = `UPDATE starosta SET starostaName = '${result_select[0].id}' WHERE starostaGroup IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`; // обновлюю, старосту групи
-                                db.connection.query(query, (err, result) => {
-                                    if (err) {
-                                        res.status(500).json({
-                                            message: "Помилка"
-                                        });
-                                    } else {
-                                        res.status(200).json({
-                                            message: "Старосту було добавлено"
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    );
-                }
-            });
-        }
-    };
 };
 
 exports.students = (req, res) => {
     let group = req.body.group;
     let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
     db.connection.query(sql, (err, result) => {
-        if (err) res.status(500).json({
-            message: "Помилка"
-        });
-        res.send(result);
+        if (err) res.status(500).json({message: "Помилка"});
+        return res.send(result);
     });
+};
+
+//Получить всех старост
+exports.getStarosta = (req, res) => {
+    db.connection.query("SELECT `fullName`,`starostaGroup`,`login`,`password` FROM starosta,students WHERE (starosta.starostaName = students.id)", (err, result) => {
+        if (err) return res.status(500).json({message: "Помилка БД"});
+        console.log(result);
+        return res.send(result).status(200);
+    });
+};
+
+// Добавлення старости групи
+exports.insertingStarosta = (req, res) => {
+    const {name, group, login, password} = req.body;
+    let selectId = `SELECT id FROM students WHERE fullName = '${name}' AND studentGroup = '${group}'`;
+    let check = `SELECT * FROM starosta WHERE starostaGroup = '${group}'`;
+
+    if (name.length === 0 || group.length === 0) return res.status(500).json({message: "Ви не ввели студента",});
+    db.connection.query(check, (err_check, result_check) => { // шукаю чи є такий студент і група
+            if (typeof result_check === "undefined" || Object.keys(result_check).length === 0) { // якщо в групі ше немає старости, то добавляю
+                db.connection.query(selectId, (error, result_select) => {  // шукаю його id, якщо є такий студент
+                    if (result_select.length === 0) return res.status(500).json({message: "Такої групи або студента не існує"});
+                    let query = `INSERT INTO starosta (starostaName, starostaGroup, login, password) VALUES (${result_select[0].id}, ${group}, ${login}, ${password})`; // добавляю старосту в групу
+                    db.connection.query(query, (err, result) => {
+                        if (err) return res.status(500).json({message: "Помилка, логін вже існує"});
+                        return res.status(200).json({message: "Старосту було добавлено"});
+                    });
+                });
+            } else {
+                db.connection.query(selectId, (error, result_select) => { // якщо в групі вже є староста
+                    if (result_select.length === 0 || result_select[0].id === "undefined") return res.status(500).json({message: "Такої групи або студента не існує"});
+                    // обновлюю, старосту групи
+                    let query = `UPDATE starosta SET starostaName='${result_select[0].id}', login='${login}', password='${password}' WHERE starostaGroup IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`;
+                    db.connection.query(query, (error, result) => {
+                        if (error) return res.status(500).json({message: "Помилка"});
+                        return res.status(200).json({message: "Старосту було добавлено"});
+                    });
+                });
+            }
+        }
+    );
 };
