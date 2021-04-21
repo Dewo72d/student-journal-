@@ -79,7 +79,7 @@ function AddStarostaForm() {
         }
         //--------------------------------
         //Отправка формы в бд на выборку
-        await fetch("http://localhost:4000/api/addstarosta", {
+        await fetch("http://localhost:4000/api/addnewstarosta", {
             method: "POST",
             mode: "cors",
             body: formData,
@@ -107,6 +107,14 @@ function AddStarostaForm() {
                 <div>
                     <label>ПІП</label>
                     <input type="text" ref={register} name="name" />
+                </div>
+                <div>
+                    <label>Логін</label>
+                    <input type="text" ref={register} name="login" />
+                </div>
+                <div>
+                    <label>Пароль</label>
+                    <input type="password" ref={register} name="psw" />
                 </div>
                 <Dialog
                     open={open}

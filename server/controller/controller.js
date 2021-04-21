@@ -151,23 +151,54 @@ exports.selection = (req, res) => {
 };
 //Вивід студентів 
 exports.students = (req,res) =>{
-  let groups = req.body.group;
-  console.log(jwt);
-  let sql = `SELECT * FROM students WHERE studentGroup = '${groups}'`;
-  db.connection.query(sql,(err,result)=>{
+  jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
+    res.set("Access-Control-Allow-Origin", req.headers.origin); //<<КОСТЫЛЬ!? << ООооХ, эти 2 строки что бы можно было отправлять статус коды.
+    res.set("Access-Control-Allow-Credentials", "true");        //<<КОСТЫЛЬ!? << Без них  CORS начитает ругатся, хотя он и без этого рукается.
+    let {group} = jwt.decode(req.cookies.auth);
+    let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
+    db.connection.query(sql,(err,result)=>{
     if (err) res.status(500).json({
       message:"Помилка"
     })
+    console.log(result);
     res.send(result);
   })
+  });
+}
+exports.student = (req,res)=>{
+  let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`)
+  console.log(req.body);
+  const lesson = req.body.lesson;
+  let countA = 0;
+  let countP = 0;
+    let sqlQuery = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.Date ,lesson.value FROM lesson,students WHERE lesson.Date =  '${new Date().toISOString().slice(0,10)}' AND lesson.studentId = students.id AND lesson.lessonNumber = '${lesson}'`;
+    db.connection.query(sqlQuery,(error,result)=>{
+      if (error) console.log(error);
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].value === "absent") {
+            countA += 1;
+        } else if (result[i].value === "present") {
+            countP += 1;
+        }
+    }
+    result.push({
+        countAbsent: countA,
+        countPresent: countP
+    })
+    //--Последний елемент в масиве всегда будет  объектом с ключами: countAbsent ,countPresent --
+    res.send(result);
+    })
 }
 //Відмітка
 exports.marking = (req,res) =>{
-const name = req.body.mark;
-const group = req.body.group;
+  jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
+    res.set("Access-Control-Allow-Origin", req.headers.origin); //<<КОСТЫЛЬ!? << ООооХ, эти 2 строки что бы можно было отправлять статус коды.
+  res.set("Access-Control-Allow-Credentials", "true");        //<<КОСТЫЛЬ!? << Без них  CORS начитает ругатся, хотя он и без этого рукается.
+    let {group} = jwt.decode(req.cookies.auth);
+    const name = req.body.mark;
 const lesson = req.body.lesson;
 let today = new Date().toISOString().slice(0,10);
-let sql = `SELECT * FROM students WHERE studentGroup = '${group[0]}'`
+let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`
 db.connection.query(sql,(err,result)=>{
   if (err) console.log(err);
   for (let i = 0; i < result.length; i++)
@@ -211,6 +242,7 @@ db.connection.query(sql,(err,result)=>{
   }
   })
 res.redirect("http://localhost:3000/starosta");
+  });
 }
 //Добавление новго студента в админке
 exports.insertingStudent = (req, res) => {
@@ -306,9 +338,11 @@ exports.uppdateStudent = (req, res) => {
 exports.insertingStarosta = (req, res) => {
   const name = req.body.name;
   const group = req.body.group;
+  const login = req.body.login;
+  const psw = req.body.psw;
   let select_id = `SELECT id FROM students WHERE fullName = '${name}' AND studentGroup = '${group}'`;
-  let check = `SELECT * FROM starosta WHERE starostaGroup = '${group}'`;
-  if (name.length == 0 || group.length == 0) { 
+  let check = `SELECT * FROM starosta WHERE starosta.Group = '${group}'`;
+  if (name.length == 0 || group.length == 0 || login.length == 0 || psw.length == 0) { 
     res.status(500).json({
       message: "Ви не ввели студента",
     })
@@ -323,12 +357,10 @@ exports.insertingStarosta = (req, res) => {
             })
           }
           else {
-            let query = `INSERT INTO starosta (starostaName,starostaGroup) VALUES ('${result_select[0].id}','${group}')`; // добавляю старосту в групу
+            let query = `INSERT INTO starosta (starosta.starostaName,starosta.Group,starosta.login,starosta.password) VALUES ('${result_select[0].id}','${group}','${login}','${psw}')`; // добавляю старосту в групу
             db.connection.query(query, (err, result) => {
               if (err) {
-                res.status(500).json({
-                  message: "Помилка"
-                })
+                console.log(err);
               }
               else {
                 res.status(200).json({
@@ -348,12 +380,12 @@ exports.insertingStarosta = (req, res) => {
             })
           }
           else {
-            let query = `UPDATE starosta SET starostaName = '${result_select[0].id}' WHERE starostaGroup IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`; // обновлюю, старосту групи
+            const hash = bcrypt.hashSync(`${psw}`, 10);
+            console.log(hash);
+            let query = `UPDATE starosta SET starosta.starostaName = '${result_select[0].id}',starosta.Group = '${group}',starosta.login = '${login}',starosta.password = '${hash}' WHERE starosta.Group IN(SELECT studentGroup FROM students WHERE id = '${result_select[0].id}')`; // обновлюю, старосту групи
             db.connection.query(query, (err, result) => {
               if (err) {
-                res.status(500).json({
-                  message: "Помилка"
-                })
+                console.log(err);
               }
               else {
                 res.status(200).json({
@@ -368,65 +400,4 @@ exports.insertingStarosta = (req, res) => {
     })
   }
 }
-//Вивід студентів 
-exports.students = (req,res) =>{
-  let group = req.body.group;
-  let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
-  db.connection.query(sql,(err,result)=>{
-    if (err) res.status(500).json({
-      message:"Помилка"
-    })
-    res.send(result);
-  })
-}
-//Відмітка
-exports.marking = (req,res) =>{
-const name = req.body.mark;
-const group = req.body.group;
-const lesson = req.body.lesson;
-let today = new Date().toISOString().slice(0,10);
-let sql = `SELECT * FROM students WHERE studentGroup = '${group[0]}'`
-db.connection.query(sql,(err,result)=>{
-  if (err) console.log(err);
-  for (let i = 0; i < result.length; i++)
-  {
-    let present = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','present','${today}')`;
-    let absent = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','absent','${today}')`;
-    if (Array.isArray(name))
-    {
-      if (name[i] == result[i].fullName)
-    {
-      db.connection.query(present,(err_present,result_present)=>{
-        if (err) console.log(err_present);
-        console.log(result_present);
-      })
-    }
-    else
-    {
-      db.connection.query(absent,(err_absent,result_absent)=>{
-        if (err) console.log(err_absent);
-        console.log(result_absent);
-      })
-    }
-    }
-    else
-    {
-      if (name == result[i].fullName)
-      {
-        db.connection.query(present,(err_present,result_present)=>{
-          if (err) console.log(err_present);
-          console.log(result_present);
-        })
-      }
-      else
-      {
-        db.connection.query(absent,(err_absent,result_absent)=>{
-          if (err) console.log(err_absent);
-          console.log(result_absent);
-        })
-      }
-    }
-  }
-  })
-res.redirect("http://localhost:3000/teacher");
-}
+//

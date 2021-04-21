@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
 import StarostaTable from "../table/starosta-table";
+import { FormControlLabel, Input } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   card: {
     [theme.breakpoints.down("xs")]: {
@@ -64,10 +65,6 @@ const useStyles = makeStyles((theme) => ({
 
 const lessons = [
   {
-    value: "0",
-    label: "Всі",
-  },
-  {
     value: "1",
     label: "1",
   },
@@ -91,7 +88,9 @@ function FilterForm() {
   const [lesson, setLesson] = useState(lessons[0].value);
   const [selection, setSelection] = useState([]);
   const hendleChange = (event) => {
+    debugger;
     setLesson(event.target.value);
+    console.log(lesson);
   };
 
   const onSubmit = async (data) => {
@@ -102,7 +101,7 @@ function FilterForm() {
     }
     //--------------------------------
     //Отправка формы в бд на выборку
-    await fetch("http://localhost:4000/api/setstudents", {
+    await fetch("http://localhost:4000/api/students", {
       method: "POST",
       mode: "cors",
       body: formData,
@@ -124,9 +123,18 @@ function FilterForm() {
     <div>
       <StarostaTable selection={selection}/>
       <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
+      <div>
+          <label>Пара</label>
+          <select name="lesson" ref={register}>
+            {lessons.map((val) => (
+              <option key={val.value} value={val.value}>
+                {val.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
-          <label>Група</label>
-          <input ref={register} type="number" name="group" />
+        <Input type="text" name="name" ref={register}/>
         </div>
         <Button variant="contained" color="primary" type="submit">
           Відправити
