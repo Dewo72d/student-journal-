@@ -213,10 +213,28 @@ exports.uppdateStudent = (req, res) => {
     });
 };
 
+//Удаление препода
+exports.deletePrepod = (req, res) => {
+    const {name, group} = req.body;
+
+    if (name.length === 0 || group.length === 0) return res.status(200).json({message: "Ви не ввели викладача чи групу",});
+    db.connection.query(`SELECT * FROM prepod WHERE prepodGroup = ${group}`, (err, result) => {
+        if (err) return res.status(500).json({message: "Ошибка БД"});
+        if (Object.keys(result).length > 0) {
+            db.connection.query(`DELETE FROM prepod WHERE prepodGroup = ${group}`, (err, result) => {
+                if (err) return res.status(500).json({message: "Ошибка БД"});
+                res.status(200).json({message: "Викладача було видалено"});
+            });
+        } else {
+            return res.status(200).json({message: "Такого викладача немає"});
+        }
+    });
+};
+
 // Удаление студента
 exports.deletingStudent = (req, res) => {
-    const name = req.body.name;
-    const group = req.body.group;
+    const {name, group} = req.body;
+
     if (name.length === 0 || group.length === 0) {
         return res.status(200).json({
             message: "Ви не ввели студента чи групу",
@@ -289,11 +307,12 @@ exports.marking = (req, res) => {
     );
 };
 
+// ?????????
 exports.students = (req, res) => {
     let group = req.body.group;
     let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
     db.connection.query(sql, (err, result) => {
-        if (err) res.status(500).json({message: "Помилка"});
+        if (err) return res.status(500).json({message: "Помилка"});
         return res.send(result);
     });
 };
@@ -304,6 +323,38 @@ exports.getStarosta = (req, res) => {
         if (err) return res.status(500).json({message: "Помилка БД"});
         console.log(result);
         return res.send(result).status(200);
+    });
+
+};//Получить всех Преподов
+exports.getPrepod = (req, res) => {
+    db.connection.query("SELECT `fullName`,`prepodGroup`,`login`,`password` FROM prepod", (err, result) => {
+        if (err) return res.status(500).json({message: "Помилка БД"});
+        console.log(result);
+        return res.send(result).status(200);
+    });
+};
+
+// Добавлення препода
+exports.insertingPrepod = (req, res) => {
+    const {name, group, login, password} = req.body;
+
+    if (name.length === 0 || group.length === 0 || login.length === 0 || password.length === 0) return res.status(500).json({message: "Заповніть форму",});
+    db.connection.query(`SELECT * FROM prepod WHERE prepodGroup = ${group}`, (err, result) => {
+        if (err) return res.status(500).json({message: "Помилка БД"});
+        if (Object.keys(result).length === 0) {
+            db.connection.query(`INSERT INTO prepod(fullName, prepodGroup, login, password) VALUES ("${name}","${group}","${login}","${password}")`, (err, result) => {
+                if (err) return res.status(500).json({message: "Помилка, логін вже існує"});
+                return res.status("200").json({message: "Успішно"});
+            });
+        } else if (result[0].fullName === name) {
+            db.connection.query(`UPDATE prepod SET prepodGroup=${group}, login="${login}", password="${password}"`, (err, result) => {
+                console.log(result, err);
+                if (err) return res.status(500).json({message: "Помилка, логін вже існує"});
+                return res.status("200").json({message: "Успішно"});
+            });
+        } else {
+            return res.status(500).json({message: "Помилка, логін вже існує"});
+        }
     });
 };
 
