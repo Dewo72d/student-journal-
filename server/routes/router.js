@@ -13,7 +13,10 @@ router.use("/api/uppdatestudents", controller.uppdateStudent);
 router.use("/api/marking", controller.marking);
 router.use("/api/setstudents", controller.students);
 router.use("/api/addnewstarosta", controller.insertingStarosta);
+router.use("/api/addnewprepod", controller.insertingPrepod);
 router.use("/api/getstarosta", controller.getStarosta);
+router.use("/api/getprepod", controller.getPrepod);
+router.use("/api/deleteprepod", controller.deletePrepod);
 
 app.use(function (err, req, res) {
     console.error(err.stack);
