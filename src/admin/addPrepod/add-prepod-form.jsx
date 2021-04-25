@@ -13,7 +13,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import {Alert, AlertTitle} from "@material-ui/lab";
 import React, {useState} from "react";
 import {useForm} from "react-hook-form";
-import StarostaTable from "../table/starosta-table";
+import PrepodTable from "../table/prepod-table";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function AddStarostaForm() {
+function AddPrepodForm() {
     const classes = useStyles();
     const {register, handleSubmit} = useForm([]);
     const [open, setOpen] = useState(false);
@@ -82,16 +82,16 @@ function AddStarostaForm() {
         setOpen(true);
     };
 
-    const getList = async () => {
-        await fetch("http://localhost:4000/api/getstarosta", {
-            method: "POST",
-            mode: "cors",
-        }).then(async (res) => await res.json()).then((res) => setList(res));
-    };
-
     const handleClose = () => {
         setOpen(false);
         setAlertOpen(true);
+    };
+
+    const getList = async () => {
+        await fetch("http://localhost:4000/api/getprepod", {
+            method: "POST",
+            mode: "cors",
+        }).then(async (res) => await res.json()).then(async (res) => setList(res));
     };
 
     const onSubmit = async (data) => {
@@ -102,7 +102,7 @@ function AddStarostaForm() {
         }
         //--------------------------------
         //Отправка формы в бд на выборку
-        fetch("http://localhost:4000/api/addnewstarosta", {
+        fetch("http://localhost:4000/api/addnewprepod", {
             method: "POST",
             mode: "cors",
             body: formData,
@@ -111,10 +111,10 @@ function AddStarostaForm() {
                 return await res.json();
             })
             .then(async (res) => {
-                return await setResult(res);
+                setResult(res);
             })
             .catch((err) => {
-                console.log(err);
+                console.log(err, "<<<<<<<");
             }, []);
     };
     const onErr = (err) => {
@@ -122,16 +122,16 @@ function AddStarostaForm() {
     };
     return (
         <div>
-            <StarostaTable list={list}/>
-            <button onClick={getList}>Отримати список старост</button>
-            <form onSubmit={handleSubmit(onSubmit, onErr)} id="insert_starosta" className={classes.card}>
-                <div>
-                    <label>Група</label>
-                    <input ref={register} type="number" name="group"/>
-                </div>
+            <PrepodTable list={list}/>
+            <button onClick={getList}>Отримати список викладачів</button>
+            <form onSubmit={handleSubmit(onSubmit, onErr)} id="insert_prepod" className={classes.card}>
                 <div>
                     <label>ПІП</label>
                     <input type="text" ref={register} name="name"/>
+                </div>
+                <div>
+                    <label>Група</label>
+                    <input ref={register} type="number" name="group"/>
                 </div>
                 <div>
                     <label>Логін</label>
@@ -140,14 +140,6 @@ function AddStarostaForm() {
                 <div>
                     <label>Пароль</label>
                     <input type="text" ref={register} name="password"/>
-                </div>
-                <div>
-                    <label>Логін</label>
-                    <input type="text" ref={register} name="login" />
-                </div>
-                <div>
-                    <label>Пароль</label>
-                    <input type="password" ref={register} name="psw" />
                 </div>
                 <Dialog
                     open={open}
@@ -158,15 +150,15 @@ function AddStarostaForm() {
                     <DialogTitle id="alert-dialog-title">{"Добавити старосту?"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            Ви впевнені,що хочете добавити нового студента?
+                            Ви впевнені,що хочете добавити нового викладача?
                         </DialogContentText>
-                        <b> (Якщо староста вже є, його буде замінено на нового)</b>
+                        <b> (Якщо викладач вже існує, його логін, пароль буде змінено)</b>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose} color="primary">
                             Закрити
                         </Button>
-                        <Button variant="contained" color="primary" type="submit" form="insert_starosta"
+                        <Button variant="contained" color="primary" type="submit" form="insert_prepod"
                                 onClick={handleClose}>
                             Добавити
                         </Button>
@@ -177,10 +169,10 @@ function AddStarostaForm() {
                 </Button>
             </form>
             <div className={classes.alert}>
-                {result.message === 'Ви не ввели студента' ? (<Alert severity="info">
+                {result.message === 'Заповніть форму' ? (<Alert severity="info">
                     <AlertTitle>Info</AlertTitle>
                     <strong>{result.message}</strong>
-                </Alert>) : result.message === 'Помилка, логін вже існує' || result.message === 'Такої групи або студента не існує' ? (
+                </Alert>) : result.message === 'Помилка, логін вже існує' || result.message === 'Помилка, такої групи не існує' || result.message === "Помилка" || result.message === "Помилка БД" ? (
                     <div>
                         <Collapse in={alertopen}>
                             <Alert
@@ -201,7 +193,7 @@ function AddStarostaForm() {
                                 <strong>{result.message}</strong>
                             </Alert>
                         </Collapse>
-                    </div>) : result.message === 'Старосту було добавлено' ? ((<div>
+                    </div>) : result.message === 'Успішно' ? ((<div>
                     <Collapse in={alertopen}>
                         <Alert
                             action={
@@ -220,10 +212,10 @@ function AddStarostaForm() {
                             <strong>{result.message}</strong>
                         </Alert>
                     </Collapse>
-                </div>)) : (<div></div>)}
+                </div>)) : (<div> </div>)}
             </div>
         </div>
     );
 }
 
-export default AddStarostaForm;
+export default AddPrepodForm;

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -6,23 +6,16 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import ReactToExcel from "react-html-table-to-excel";
-import image from "../../img/print.webp";
-import ReactToPrint from "react-to-print";
-import "../../App.css";
-import {Button} from "@material-ui/core";
 
-function AdminTable(props) {
-    const componentRef = useRef();
-    const [result, setResult] = useState([]); //Выборка
+function PrepodTable(props) {
+    const [list, setList] = useState([]); //Выборка
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const columns = [
         {id: "group", label: "Група"},
         {id: "code", label: "Имя"},
-        {id: "lesson", label: "Пара №"},
-        {id: "mark", label: "Відмітка"},
-        {id: "date", label: "Дата"},
+        {id: "login", label: "Логін"},
+        {id: "password", label: "Пароль"},
     ];
 
     //Отображение количества записей
@@ -35,17 +28,12 @@ function AdminTable(props) {
         setPage(0);
     };
     //-------------------------
-
-    //Перерисовка на основе выборки
-    useEffect(() => {
-        setResult(props.selection);
-    }, [props.selection]);
-    //----------------------
+    useEffect(() => setList(props.list), [props.list]);
 
     return (
         <div>
             <TableContainer>
-                <Table stickyHeader aria-label="sticky table" id="table-to-xls" ref={componentRef}>
+                <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
@@ -60,7 +48,7 @@ function AdminTable(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {result
+                        {list
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((result) => {
                                 return (
@@ -71,56 +59,33 @@ function AdminTable(props) {
                                         key={Math.random()}
                                     >
                                         <TableCell key={Math.random()}>
-                                            {result.studentGroup}
-                                        </TableCell>
-                                        <TableCell key={Math.random()}>{result.fullName}</TableCell>
-                                        <TableCell key={Math.random()}>
-                                            {result.lessonNumber}
+                                            {result.prepodGroup}
                                         </TableCell>
                                         <TableCell key={Math.random()}>
-                                            {/* ОСТОРОЖНО, МОЖНО ПОВРЕДИТЬ ГЛАЗА*/}
-                                            {/* Это нужно что бы "корректно" отображалась последняя строка в таблице*/}
-                                            {result.value === "absent" ? <b>Відсутній</b> : result.value === "present" ?
-                                                <i>Присутній</i> : ""}
+                                            {result.fullName}
                                         </TableCell>
                                         <TableCell key={Math.random()}>
-                                            {typeof result.Date === "undefined" ? "" : new Date(result.Date).toLocaleDateString()}
+                                            {result.login}
                                         </TableCell>
-                                        {/*-------------------------------------------------*/}
+                                        <TableCell key={Math.random()}>
+                                            {result.password}
+                                        </TableCell>
                                     </TableRow>
                                 );
                             })}
                     </TableBody>
                 </Table>
                 <TablePagination
-                    rowsPerPageOptions={[4, 10, 15, 20, 25, 30, 100]}
                     component="div"
-                    count={result.length}
+                    count={list.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onChangePage={handleChangePage}
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                 />
             </TableContainer>
-            <div>
-                <p>Відсутніх - {result.map(i => i.countAbsent)}</p>
-                <p>Присутніх - {result.map(i => i.countPresent)}</p>
-            </div>
-            <ReactToExcel
-                className="download-table-xls-button"
-                table="table-to-xls"
-                filename="excelFile"
-                sheet="sheet 1"
-                buttonText="Excel"
-            />
-            <br/>
-            <ReactToPrint
-                trigger={() => <Button variant="contained" color="secondary"><img src={image} alt="print"
-                                                                                  className="image"/></Button>}
-                content={() => componentRef.current}
-            />
         </div>
     );
 }
 
-export default AdminTable;
+export default PrepodTable;
