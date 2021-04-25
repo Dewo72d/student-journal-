@@ -17,7 +17,6 @@ function StarostaTable(props) {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const columns = [
-        { id: "group", label: "Група" },
         { id: "code", label: "Имя" },
     ];
     const lessons = [
@@ -52,11 +51,22 @@ function StarostaTable(props) {
 
     //Перерисовка на основе выборки
     useEffect(() => {
-
+        fetch("http://localhost:4000/api/setstudents", {
+            method: "POST",
+            mode: "cors",
+            credentials: "include",
+            body: document.cookie,
+        }).then(async (res) => {
+            return await  res.json();
+        })
+        .then(async(res)=>{
+            return await setResult(res);
+        })
+    }, []);
+    //----------------------
+    useEffect(() => {
         setResult(props.selection);
     }, [props.selection]);
-    //----------------------
-
     return (
         <div>
             <TableContainer>
@@ -87,15 +97,16 @@ function StarostaTable(props) {
                                             key={Math.random()}
                                         >
                                             <TableCell key={Math.random()}>
-                                            <FormControlLabel
-                                                control={<Input name="group" value={result.studentGroup}/>}
-                                                />
-                                            </TableCell>
-                                            <TableCell key={Math.random()}>
-                                                <FormControlLabel
-                                                control={<Checkbox name="mark" value={result.fullName}/>}
+                                            {result.value === 'undefined' ? ( <FormControlLabel
+                                                control={<Checkbox name="mark" value={result.fullName} checked={false}/>}
                                                 label={result.fullName}
-                                                />
+                                                />) : result.value === 'present' ? ( <FormControlLabel
+                                                    control={<Checkbox name="mark" value={result.fullName} checked={true}/>}
+                                                    label={result.fullName}
+                                                    />) : (<FormControlLabel
+                                                        control={<Checkbox name="mark" value={result.fullName}/>}
+                                                        label={result.fullName}
+                                                        />)}
                                             </TableCell>
                                             {/*-------------------------------------------------*/}
                                         </TableRow>
@@ -125,6 +136,10 @@ function StarostaTable(props) {
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                 />
             </TableContainer>
+            <div>
+                <p>Відсутніх - {result.map(i => i.countAbsent)}</p>
+                <p>Присутніх - {result.map(i => i.countPresent)}</p>
+            </div>
             <ReactToExcel
                 className="download-table-xls-button"
                 table="table-to-xls"
