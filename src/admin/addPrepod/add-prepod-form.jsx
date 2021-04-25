@@ -172,7 +172,7 @@ function AddPrepodForm() {
                 {result.message === 'Заповніть форму' ? (<Alert severity="info">
                     <AlertTitle>Info</AlertTitle>
                     <strong>{result.message}</strong>
-                </Alert>) : result.message === 'Помилка, логін вже існує' || result.message === 'Помилка, такої групи не існує' || result.message === "Помилка" || result.message === "Помилка БД" ? (
+                </Alert>) : result.message === 'Помилка, логін вже існує' || result.message === 'Помилка, логін вже існує або такої групі не існує' ||result.message === 'Помилка, такої групи не існує' || result.message === "Помилка" || result.message === "Помилка БД" ? (
                     <div>
                         <Collapse in={alertopen}>
                             <Alert

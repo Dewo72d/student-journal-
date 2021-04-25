@@ -226,7 +226,7 @@ exports.deletePrepod = (req, res) => {
                 res.status(200).json({message: "Викладача було видалено"});
             });
         } else {
-            return res.status(200).json({message: "Такого викладача немає"});
+            return res.status(200).json({message: "Викладача або групи не існує"});
         }
     });
 };
@@ -343,7 +343,7 @@ exports.insertingPrepod = (req, res) => {
         if (err) return res.status(500).json({message: "Помилка БД"});
         if (Object.keys(result).length === 0) {
             db.connection.query(`INSERT INTO prepod(fullName, prepodGroup, login, password) VALUES ("${name}","${group}","${login}","${password}")`, (err, result) => {
-                if (err) return res.status(500).json({message: "Помилка, логін вже існує"});
+                if (err) return res.status(500).json({message: "Помилка, логін вже існує або такої групі не існує"});
                 return res.status("200").json({message: "Успішно"});
             });
         } else if (result[0].fullName === name) {
