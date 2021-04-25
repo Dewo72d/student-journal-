@@ -149,7 +149,7 @@ function DeletePrepodForm() {
                 <Alert severity="info">
                     <AlertTitle>Info</AlertTitle>
                     <strong>{result.message}</strong>
-                </Alert>) : result.message === 'Такого викладача немає'  ? (<div>
+                </Alert>) : result.message === 'Викладача або групи не існує'  ? (<div>
                 <Collapse in={alertopen}>
                     <Alert
                         severity="warning"
