@@ -88,9 +88,8 @@ function FilterForm() {
   const [lesson, setLesson] = useState(lessons[0].value);
   const [selection, setSelection] = useState([]);
   const hendleChange = (event) => {
-    debugger;
     setLesson(event.target.value);
-    console.log(lesson);
+    console.log(lesson, "<<<<<");
   };
 
   const onSubmit = async (data) => {

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import admin from "./admin/admin-page";
 import loginPage from "./login/login-page/login-page";
 import starosta from "./starosta/starosta-page";
+import manager from "./manager/manager-page";
 import {BrowserRouter, Route, Redirect} from "react-router-dom";
 
 function App() {
@@ -16,9 +17,9 @@ function App() {
             body: document.cookie,
         }).then(async (res) => {
             const role = Object.values(await res.json())[1];
-            console.log(res.cookie);
+            console.log(Object.values(await res), Object.keys(await res));
             await setAutorized({status: res.statusText}); //Установка значения ЗАЛОГИНИЛСЯ/НЕ ЗАЛОГИНИЛСЯ
-            await setPath(role === "admin" ? {path: "/mypage"} : role === "starosta" ? {path: "/starosta"} : {path: "/auth"}); //ПРОВЕРКА И ВЫДАЧА СТРАНИЧКИ
+            await setPath(role === "admin" ? {path: "/mypage"} : role === "starosta" ? {path: "/starosta"} : role === "manager" ? {path: "/manager"} : {path: "/auth"}); //ПРОВЕРКА И ВЫДАЧА СТРАНИЧКИ
         });
     }, []);
 
@@ -36,6 +37,7 @@ function App() {
             <Route exact path="/auth" component={loginPage}/>
             <Route path="/starosta" component={starosta}/>
             <Route path="/mypage" component={admin}/>
+            <Route path="/manager" component={manager}/>
         </BrowserRouter>
     );
 }

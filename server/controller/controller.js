@@ -37,13 +37,10 @@ exports.login = (req, res) => {
   if (!login || !password) return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
 
   db.connection.query(`SELECT * FROM ${role} WHERE login = '${login}'`, (err, result) => {
-      if (err) return res.status(401).json(
-          `${new Error("Невірний  логін або пароль")}`
-      );
-
-      let group = result === undefined ? () => {
+      if (err) return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
+      let group = typeof result === "undefined" ? () => {
           return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
-      } : typeof result[0].Group === "undefined" ? "0" : result[0].Group;
+      } : typeof result[0].starostaGroup === "undefined" ? "0" : result[0].starostaGroup;
         if (result.length === 0) {
             res.status(401).json(
                 `${new Error("Невірний  логін або пароль")}`
@@ -63,7 +60,6 @@ exports.login = (req, res) => {
                     },
                     (err, token) => {
                         if (err) throw new Error(err);
-
                         res.cookie("auth", `${token}`, {httpOnly: true});
                         res.redirect("http://localhost:3000/");// БЕЗ ЭТОГО КУКА НЕ ОТПРАВЛЯЕТСЯ
                     });
