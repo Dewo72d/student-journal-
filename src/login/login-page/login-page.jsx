@@ -93,9 +93,11 @@ export default function SignIn() {
                         onChange={handleChange}
                         value={role}
                     >
-                        <option value="prepod">Викладач</option>
                         <option value="starosta">Студент</option>
+                        <option value="manager">Зам відділення</option>
+                        <option value="prepod">Викладач</option>
                         <option value="admin">Адміністратор</option>
+
                     </Select>
                     <Button
                         type="submit"
