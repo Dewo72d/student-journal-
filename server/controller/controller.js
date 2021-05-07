@@ -121,7 +121,30 @@ exports.selection = (req, res) => {
  let lesson = validator(() => req.body.lesson === "0", () => "", () => `AND lesson.lessonNumber = ${req.body.lesson}`);
  let countA = 0;
  let countP = 0;
+ let sql = `SELECT students.fullName,lesson.value,lesson.lessonNumber FROM lesson,students WHERE lesson.Date =  '${new Date().toISOString().slice(0, 10)}' AND lesson.studentId = students.id ${lesson}`;
  //------------------------------
+ if (date === `lesson.Date = STR_TO_DATE('undefined', '%Y-%m-%d')`)
+ {
+    db.connection.query(sql,(error,result)=>{
+        if (error) return res.status(401).json(`${new Error("Помилка БД")}`);
+        // Счеткик присутствующих и отствующих
+        for (let i = 0; i < result.length; i++) {
+            if (result[i].value === "absent") {
+                countA += 1;
+            } else if (result[i].value === "present") {
+                countP += 1;
+            }
+        }
+        result.push({
+            countAbsent: countA,
+            countPresent: countP
+        });
+        //--Последний елемент в масиве всегда будет  объектом с ключами: countAbsent ,countPresent --
+        res.send(result);
+    })
+ }
+ else
+ {
  let sqlQuery = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.Date ,lesson.value FROM lesson,students WHERE ${date} AND lesson.studentId = students.id ${lesson} ${group} ${name} `;
  db.connection.query(sqlQuery, (err, result) => {
      if (err) return res.status(401).json(`${new Error("Помилка БД")}`);
@@ -140,6 +163,7 @@ exports.selection = (req, res) => {
      //--Последний елемент в масиве всегда будет  объектом с ключами: countAbsent ,countPresent --
      res.send(result);
  });
+}
 };
 //Добавление новго студента в админке
 exports.insertingStudent = (req, res) => {
@@ -251,23 +275,20 @@ exports.deletingStudent = (req, res) => {
         });
     }
 };
-exports.getStudents = (req, res) => {
-    jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
-        let {group} = jwt.decode(req.cookies.auth);
-        let date = validator(() => req.body.month === "true", () => `MONTH(lesson.Date) = MONTH('${req.body.date}')`, () => `lesson.Date = STR_TO_DATE('${req.body.date}', '%Y-%m-%d')`);
-        let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`);
-        let lesson = validator(() => req.body.lesson === "0", () => "", () => `AND lesson.lessonNumber = ${req.body.lesson}`);
-        let countA = 0;
-        let countP = 0;
-        //------------------------------
-        let sqlQuery = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.Date ,lesson.value FROM lesson,students WHERE ${date} AND lesson.studentId = students.id ${lesson} ${name} AND students.studentGroup = '${group}'`;
-        db.connection.query(sqlQuery, (err, result) => {
-          console.log(result);
-        });
-    });
-}; //Отримання списку студентів в starosta/filterform.jsx, помилка була.
 exports.marking = (req,res)=>{
-    console.log(req.body);
+    let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`);
+    let group = validator(() => req.body.group === "", () => "", () => `students.studentGroup = ${req.body.group}`);
+    let lesson = validator(() => req.body.lesson === "0", () => "", () => `AND lesson.lessonNumber = ${req.body.lesson}`);
+    console.log(name,group,lesson);
+}
+//Получить всех студентов
+exports.getStudent = (req,res) =>{
+    let group = validator(() => req.body.group === "", () => "", () => `students.studentGroup = ${req.body.group}`);
+    let sql = `SELECT fullName FROM students WHERE ${group}`;
+    db.connection.query(sql,(err,result)=>{
+        if (err) return res.status(401).json(`${new Error("Помилка БД")}`);
+        res.send(result);
+    })
 }
 //Получить всех старост
 exports.getStarosta = (req, res) => {

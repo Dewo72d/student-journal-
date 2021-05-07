@@ -1,5 +1,6 @@
-import StarostaForm from "./filter-form/starosta-form";
+import StarostaForm from "./starosta-form/starosta-form";
 import { makeStyles, Paper } from "@material-ui/core";
+import { useEffect, useState } from "react";
 const useStyles = makeStyles(({
     item:{
       background: "linear-gradient( #bbb, transparent 1px), linear-gradient( 90deg, #bbb, transparent 1px)",
@@ -8,10 +9,14 @@ const useStyles = makeStyles(({
     }
   }))
 function StarostaPage(props) {
+  let [group, setGroup] = useState(0);
+  useEffect(() => {
+      setGroup(props.groupStarosta)
+  }, [props]);
   const classes = useStyles();
   return (
     <Paper className={classes.item}> 
-          <StarostaForm groupStarosta={props.groupStarosta} />
+          <StarostaForm groupStarosta={group} />
     </Paper>
   );
 }

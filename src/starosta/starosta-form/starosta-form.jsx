@@ -89,10 +89,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 const lessons = [
     {
-        value: "0",
-        label: "Всі",
-    },
-    {
         value: "1",
         label: "1",
     },
@@ -116,18 +112,41 @@ function StarostaForm(props) {
     const classes = useStyles();
     const { register, handleSubmit, control } = useForm(); // initialize the hook
     const [selection, setSelection] = useState([]);
+    const [list,setList] = useState([]);
     const [lessonData, setLessons] = useState([]);
     const handleLesson = (e) => {
         setLessons(e.target.value);
-        console.log(e);
     }
+    const getList = async (data) => {
+         // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
+         let formData = new FormData();
+         for (let key in data) {
+             formData.append(key, data[key]);
+         }
+         formData.append("group", props.groupStarosta);
+         //----Отправка формы в бд на выборку------
+         await fetch("http://localhost:4000/api/getstudents", {
+             method: "POST",
+             mode: "cors",
+             body: formData,
+         })
+             .then(async (res) => {
+                 return await res.json();
+             })
+             .then(async (res) => {
+                 return await setList(res);
+             })
+             .catch((err) => {
+                 console.log(err);
+             }, []);
+    };
     const onSubmit = async (data) => {
         // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
         let formData = new FormData();
         for (let key in data) {
             formData.append(key, data[key]);
-            console.log(data);
         }
+        formData.append("group", props.groupStarosta);
         //----Отправка формы в бд на выборку------
         await fetch("http://localhost:4000/api/selection", {
             method: "POST",
@@ -150,19 +169,10 @@ function StarostaForm(props) {
     return (
         <div className={classes.item}>
             <div ref={componentRef}>
-                <StarostaTable groupStarosta={props.groupStarosta} selection={selection} />
+                <StarostaTable groupStarosta={props.groupStarosta} list={list} selection={selection} />
             </div>
+            <Button color="primary" variant="outlined" onClick={getList}>Отримати список студентів</Button>
             <form  onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
-            <div>
-                    <TextField
-                        inputRef={register}
-                        id="group"
-                        type="number"
-                        name="group"
-                        value={props.groupStarosta}
-                        label="Група"
-                    />
-                </div>
                 <div>
                     <TextField
                         inputRef={register}

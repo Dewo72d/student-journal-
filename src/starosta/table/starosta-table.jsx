@@ -9,7 +9,7 @@ import TableRow from "@material-ui/core/TableRow";
 import ReactToExcel from "react-html-table-to-excel";
 import image from "../../img/print.webp";
 import ReactToPrint from "react-to-print";
-import {Button} from "@material-ui/core";
+import {Button, Checkbox, FormControlLabel} from "@material-ui/core";
 
 function StarostaTable(props) {
     const componentRef = useRef();
@@ -17,11 +17,7 @@ function StarostaTable(props) {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const columns = [
-        {id: "group", label: "Група"},
-        {id: "code", label: "Имя"},
-        {id: "lesson", label: "Пара №"},
-        {id: "mark", label: "Відмітка"},
-        {id: "date", label: "Дата"},
+        {id: "code", label: "Ім'я"},
     ];
 
     //Отображение количества записей
@@ -37,8 +33,11 @@ function StarostaTable(props) {
 
     //Перерисовка на основе выборки
     useEffect(() => {
-        setResult(props.selection);
+        setResult(props.selection.splice(0,props.selection.length - 1));
     }, [props.selection]);
+    useEffect(() => {
+        setResult(props.list);
+    }, [props.list]);
     //----------------------
 
     return (
@@ -59,37 +58,33 @@ function StarostaTable(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {result
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((result) => {
-                                return (
-                                    <TableRow
-                                        hover
-                                        role="checkbox"
-                                        tabIndex={-1}
-                                        key={Math.random()}
-                                    >
-                                        <TableCell key={Math.random()}>
-                                            {result.studentGroup}
-                                        </TableCell>
-                                        <TableCell key={Math.random()}>{result.fullName}</TableCell>
-                                        <TableCell key={Math.random()}>
-                                            {result.lessonNumber}
-                                        </TableCell>
-                                        <TableCell key={Math.random()}>
-                                            {/* ОСТОРОЖНО, МОЖНО ПОВРЕДИТЬ ГЛАЗА*/}
-                                            {/* Это нужно что бы "корректно" отображалась последняя строка в таблице*/}
-                                            {result.value === "absent" ? <b>Відсутній</b> : result.value === "present" ?
-                                                <i>Присутній</i> : ""}
-                                        </TableCell>
-                                        <TableCell key={Math.random()}>
-                                            {typeof result.Date === "undefined" ? "" : new Date(result.Date).toLocaleDateString()}
-                                        </TableCell>
-                                        {/*-------------------------------------------------*/}
-                                    </TableRow>
-                                );
-                            })}
-                    </TableBody>
+                            {result
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((result) => {
+                                    return (
+                                        <TableRow
+                                            hover
+                                            role="checkbox"
+                                            tabIndex={-1}
+                                            key={Math.random()}
+                                        >
+                                            <TableCell key={Math.random()}>
+                                            {result.value === 'undefined' ? ( <FormControlLabel
+                                                control={<Checkbox name="mark" value={result.fullName} checked={false}/>}
+                                                label={result.fullName}
+                                                />) : result.value === 'present' ? ( <FormControlLabel
+                                                    control={<Checkbox name="mark" value={result.fullName} checked={true}/>}
+                                                    label={result.fullName}
+                                                    />) : (<FormControlLabel
+                                                        control={<Checkbox name="mark" value={result.fullName}/>}
+                                                        label={result.fullName}
+                                                        />)}
+                                            </TableCell>
+                                            {/*-------------------------------------------------*/}
+                                        </TableRow>
+                                    );
+                                })}
+                        </TableBody>
                 </Table>
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 15, 30]}

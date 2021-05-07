@@ -119,15 +119,14 @@ function PrepodFilterForm(props) {
     const [lessonData, setLessons] = useState([]);
     const handleLesson = (e) => {
         setLessons(e.target.value);
-        console.log(e);
     }
     const onSubmit = async (data) => {
         // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
         let formData = new FormData();
         for (let key in data) {
             formData.append(key, data[key]);
-            console.log(data);
         }
+        formData.append("group", props.groupPrepod);
         //----Отправка формы в бд на выборку------
         await fetch("http://localhost:4000/api/selection", {
             method: "POST",
@@ -153,16 +152,6 @@ function PrepodFilterForm(props) {
                 <PrepodTable selection={selection} />
             </div>
             <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
-                <div>
-                    <TextField
-                        inputRef={register}
-                        id="group"
-                        type="number"
-                        name="group"
-                        value={props.groupPrepod}
-                        label="Група"
-                    />
-                </div>
                 <div>
                     <TextField
                         inputRef={register}
