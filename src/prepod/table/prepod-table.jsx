@@ -9,9 +9,9 @@ import TableRow from "@material-ui/core/TableRow";
 import ReactToExcel from "react-html-table-to-excel";
 import image from "../../img/print.webp";
 import ReactToPrint from "react-to-print";
-import "../../App.css";
 import {Button} from "@material-ui/core";
-function AdminTable(props) {
+
+function PrepodTable(props) {
     const componentRef = useRef();
     const [result, setResult] = useState([]); //Выборка
     const [page, setPage] = React.useState(0);
@@ -92,7 +92,7 @@ function AdminTable(props) {
                     </TableBody>
                 </Table>
                 <TablePagination
-                    rowsPerPageOptions={[4, 10, 15, 20, 25, 30, 100]}
+                    rowsPerPageOptions={[5, 10, 15, 30]}
                     component="div"
                     count={result.length}
                     rowsPerPage={rowsPerPage}
@@ -114,7 +114,7 @@ function AdminTable(props) {
             />
             <br/>
             <ReactToPrint
-                trigger={() => <Button variant="outlined" size="medium" color="primary" style={{marginTop:".5em",marginBottom:".5em"}}><img  src={image} alt="print"
+                trigger={() => <Button variant="outlined" size="medium" color="primary" style={{marginTop:".5em",marginBottom:".5em"}}><img src={image} alt="print"
                                                                                   className="image"/></Button>}
                 content={() => componentRef.current}
             />
@@ -122,4 +122,4 @@ function AdminTable(props) {
     );
 }
 
-export default AdminTable;
+export default PrepodTable;

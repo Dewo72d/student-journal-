@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
-import AdminTable from "../table/admin-table";
+import PrepodTable from "../table/prepod-table";
 import { makeStyles } from "@material-ui/core/styles";
-import { Checkbox, FormControl, FormControlLabel,InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
+import { Checkbox, FormControl, FormControlLabel,InputLabel, MenuItem,Select, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -12,6 +12,9 @@ const useStyles = makeStyles((theme) => ({
             "& .MuiFormControl-root": {
                 marginBottom: "1em",
             },
+            "& Button":{
+                marginBottom: "1em"
+            }
         },
         [theme.breakpoints.up("sm")]: {
             alignItems: "center",
@@ -107,12 +110,14 @@ const lessons = [
     },
 ];
 
-function FilterForm() {
+function PrepodFilterForm(props) {
+    debugger;
     const componentRef = useRef();
     const classes = useStyles();
     const { register, handleSubmit, control } = useForm(); // initialize the hook
     const [selection, setSelection] = useState([]);
     const [lessonData, setLessons] = useState([]);
+    const [group,setGroup] = useState([]);
     const handleLesson = (e) => {
         setLessons(e.target.value);
         console.log(e);
@@ -140,22 +145,25 @@ function FilterForm() {
                 console.log(err);
             }, []);
     };
+    useEffect(() => {
+        setGroup(props.groupPrepod)
+    }, [props]);
     //--------------------------------
     const onErr = (err) => console.error(err);
 
     return (
         <div>
             <div ref={componentRef}>
-                <AdminTable selection={selection} />
+                <PrepodTable selection={selection} />
             </div>
             <form  onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
-                <div>
+            <div>
                     <TextField
                         inputRef={register}
                         id="group"
-                        name="group"
                         type="number"
-                        label="Група"
+                        name="group"
+                        value={group}
                     />
                 </div>
                 <div>
@@ -221,4 +229,4 @@ function FilterForm() {
     );
 }
 
-export default FilterForm;
+export default PrepodFilterForm;

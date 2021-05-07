@@ -1,4 +1,3 @@
-import React, {useEffect, useState} from "react";
 import FilterForm from "./filter-form/filter-form";
 import Paper from "@material-ui/core/Paper";
 import {
@@ -18,6 +17,7 @@ import DeletePrepodForm from "./deletePrepod/delete-prepod-form";
 const useStyles = makeStyles({
     card: {
         display: "block",
+        fontFamily: "Roboto, sans-serif",
     },
 });
 

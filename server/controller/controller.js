@@ -120,6 +120,7 @@ exports.addNewStarosta = (req, res) => {
 
 //Выборка в админке
 exports.selection = (req, res) => {
+<<<<<<< Updated upstream
     let date = validator(() => req.body.month === "true", () => `MONTH(lesson.Date) = MONTH('${req.body.date}')`, () => `lesson.Date = STR_TO_DATE('${req.body.date}', '%Y-%m-%d')`)
     let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`)
     let group = validator(() => req.body.group === "", () => "", () => `AND students.studentGroup = ${req.body.group}`)
@@ -241,6 +242,34 @@ db.connection.query(sql,(err,result)=>{
 res.redirect("http://localhost:3000/starosta");
   });
 }
+=======
+ let date = validator(() => req.body.month === "true", () => `MONTH(lesson.Date) = MONTH('${req.body.date}')`, () => `lesson.Date = STR_TO_DATE('${req.body.date}', '%Y-%m-%d')`);
+ let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`);
+ let group = validator(() => req.body.group === "", () => "", () => `AND students.studentGroup = ${req.body.group}`);
+ let lesson = validator(() => req.body.lesson === "0", () => "", () => `AND lesson.lessonNumber = ${req.body.lesson}`);
+ let countA = 0;
+ let countP = 0;
+ //------------------------------
+ let sqlQuery = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.Date ,lesson.value FROM lesson,students WHERE ${date} AND lesson.studentId = students.id ${lesson} ${group} ${name} `;
+ db.connection.query(sqlQuery, (err, result) => {
+     if (err) return res.status(401).json(`${new Error("Помилка БД")}`);
+     // Счеткик присутствующих и отствующих
+     for (let i = 0; i < result.length; i++) {
+         if (result[i].value === "absent") {
+             countA += 1;
+         } else if (result[i].value === "present") {
+             countP += 1;
+         }
+     }
+     result.push({
+         countAbsent: countA,
+         countPresent: countP
+     });
+     //--Последний елемент в масиве всегда будет  объектом с ключами: countAbsent ,countPresent --
+     res.send(result);
+ });
+};
+>>>>>>> Stashed changes
 //Добавление новго студента в админке
 exports.insertingStudent = (req, res) => {
     const name = req.body.name;
@@ -351,60 +380,24 @@ exports.deletingStudent = (req, res) => {
         });
     }
 };
-
-//Отметки
-exports.marking = (req, res) => {
-    const name = req.body.mark;
-    const group = req.body.group;
-    const lesson = req.body.lesson;
-    let today = new Date().toISOString().slice(0, 10);
-    let sql = `SELECT * FROM students WHERE studentGroup = '${group[0]}'`;
-    db.connection.query(sql, (err, result) => {
-            if (err) console.log(err);
-            for (let i = 0; i < result.length; i++) {
-                let present = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','present','${today}')`;
-                let absent = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','absent','${today}')`;
-                if (Array.isArray(name)) {
-                    if (name[i] === result[i].fullName) {
-                        db.connection.query(present, (err_present, result_present) => {
-                            if (err) console.log(err_present);
-                            console.log(result_present);
-                        });
-                    } else {
-                        db.connection.query(absent, (err_absent, result_absent) => {
-                            if (err) console.log(err_absent);
-                            console.log(result_absent);
-                        });
-                    }
-                } else {
-                    if (name === result[i].fullName) {
-                        db.connection.query(present, (err_present, result_present) => {
-                            if (err) console.log(err_present);
-                            console.log(result_present);
-                        });
-                    } else {
-                        db.connection.query(absent, (err_absent, result_absent) => {
-                            if (err) console.log(err_absent);
-                            console.log(result_absent);
-                        });
-                    }
-                }
-            }
-            res.redirect("http://localhost:3000/teacher");
-        }
-    );
-};
-
-// ?????????
-exports.students = (req, res) => {
-    let group = req.body.group;
-    let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
-    db.connection.query(sql, (err, result) => {
-        if (err) return res.status(500).json({message: "Помилка"});
-        return res.send(result);
+exports.getStudents = (req, res) => {
+    jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
+        let {group} = jwt.decode(req.cookies.auth);
+        let date = validator(() => req.body.month === "true", () => `MONTH(lesson.Date) = MONTH('${req.body.date}')`, () => `lesson.Date = STR_TO_DATE('${req.body.date}', '%Y-%m-%d')`);
+        let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`);
+        let lesson = validator(() => req.body.lesson === "0", () => "", () => `AND lesson.lessonNumber = ${req.body.lesson}`);
+        let countA = 0;
+        let countP = 0;
+        //------------------------------
+        let sqlQuery = `SELECT students.fullName,students.studentGroup,lesson.lessonNumber,lesson.Date ,lesson.value FROM lesson,students WHERE ${date} AND lesson.studentId = students.id ${lesson} ${name} AND students.studentGroup = '${group}'`;
+        db.connection.query(sqlQuery, (err, result) => {
+          console.log(result);
+        });
     });
-};
-
+}; //Отримання списку студентів в starosta/filterform.jsx, помилка була.
+exports.marking = (req,res)=>{
+    console.log(req.body);
+}
 //Получить всех старост
 exports.getStarosta = (req, res) => {
     db.connection.query("SELECT `fullName`,`starostaGroup`,`login`,`password` FROM starosta,students WHERE (starosta.starostaName = students.id)", (err, result) => {

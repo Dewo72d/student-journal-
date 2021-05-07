@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef} from "react";
 import { Controller, useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
-import AdminTable from "../table/admin-table";
+import StarostaTable from "../table/starosta-table";
 import { makeStyles } from "@material-ui/core/styles";
-import { Checkbox, FormControl, FormControlLabel,InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
+import {FormControl, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -12,6 +12,9 @@ const useStyles = makeStyles((theme) => ({
             "& .MuiFormControl-root": {
                 marginBottom: "1em",
             },
+            "& Button":{
+                marginBottom: "1em"
+            }
         },
         [theme.breakpoints.up("sm")]: {
             alignItems: "center",
@@ -30,9 +33,6 @@ const useStyles = makeStyles((theme) => ({
             },
             "& .MuiTypography-body1":{
                 fontSize: "12px",
-            },
-            "& input#date":{
-                padding: "20px 12px 10px",
             },
             "& Button":{
                 fontSize: "13px",
@@ -107,7 +107,8 @@ const lessons = [
     },
 ];
 
-function FilterForm() {
+function StarostaForm(props) {
+    debugger;
     const componentRef = useRef();
     const classes = useStyles();
     const { register, handleSubmit, control } = useForm(); // initialize the hook
@@ -146,16 +147,16 @@ function FilterForm() {
     return (
         <div>
             <div ref={componentRef}>
-                <AdminTable selection={selection} />
+                <StarostaTable groupStarosta={props.groupStarosta} selection={selection} />
             </div>
             <form  onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
-                <div>
+            <div>
                     <TextField
                         inputRef={register}
                         id="group"
-                        name="group"
                         type="number"
-                        label="Група"
+                        name="group"
+                        value={props.groupStarosta}
                     />
                 </div>
                 <div>
@@ -187,32 +188,6 @@ function FilterForm() {
                         />
                     </FormControl>
                 </div>
-                <div>
-                    <TextField
-                        inputRef={register}
-                        id="date"
-                        label="Дата"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        variant="filled"
-                        type="date"
-                        name="date"
-                    />
-                </div>
-                <div>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                name="month"
-                                color="primary"
-                                inputRef={register}
-                                defaultValue={false}
-                            />
-                        }
-                        label="Тільки за місяць"
-                    />
-                </div>
                 <Button variant="contained" color="primary" type="submit">
                     Відправити
                 </Button>
@@ -221,4 +196,4 @@ function FilterForm() {
     );
 }
 
-export default FilterForm;
+export default StarostaForm;

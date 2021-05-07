@@ -7,41 +7,56 @@ import {
     DialogContentText,
     DialogTitle,
     IconButton,
-    makeStyles
+    makeStyles,
+    TextField
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import {Alert, AlertTitle} from "@material-ui/lab";
-import React, {useState} from "react";
-import {useForm} from "react-hook-form";
+import { Alert, AlertTitle } from "@material-ui/lab";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import PrepodTable from "../table/prepod-table";
 
 const useStyles = makeStyles((theme) => ({
     card: {
-        [theme.breakpoints.down("xs")]: {
+        [theme.breakpoints.up("xs")]: {
+            textAlign: "center",
+            "& Button":{
+                marginBottom: "1em",
+                marginTop: "1em"
+            },
+            "& .MuiFormControl-root": {
+                marginBottom: "1em",
+            }
+        },
+        [theme.breakpoints.up("sm")]: {
+            alignItems: "center",
             display: "flex",
             flexWrap: "wrap",
-            flexDirection: "column",
-            justifyContent: "center",
-            gap: 10,
-            "& .MuiOutlinedInput-input": {
-                fontSize: 16,
-                marginBottom: 10,
-            },
-            "& Button": {
-                fontSize: 20,
-            },
-        },
-
-        [theme.breakpoints.down("sm")]: {
-            display: "flex",
             justifyContent: "space-between",
-            "& .MuiOutlinedInput-input": {
-                fontSize: 18,
-                hight: 20,
+            "& #name": {
+                width: "16rem",
+            },
+            "& #group": {
+                width: "2rem",
+            },
+            "& .MuiInputBase-input": {
+                fontSize: "13px",
+                height: "2.1876em",
+            },
+            "& .MuiTypography-body1": {
+                fontSize: "12px",
             },
             "& Button": {
-                fontSize: 10,
+                fontSize: "13px",
+                marginTop: "2em",
+                marginBottom: "2em"
             },
+            "& .MuiFormLabel-root": {
+                fontSise: "11px",
+            },
+            "& .MuiFormControl-root": {
+                marginBottom: "1em"
+            }
         },
 
         [theme.breakpoints.up("md")]: {
@@ -50,10 +65,20 @@ const useStyles = makeStyles((theme) => ({
             "& #name": {
                 width: "20rem",
             },
+            "& #group": {
+                width: "4rem",
+            },
+            "& .MuiInputBase-input": {
+                fontSize: "17px",
+                height: "2.1876em",
+            },
+            "& .MuiTypography-body1": {
+                fontSize: "12px",
+            },
         },
 
         [theme.breakpoints.up("lg")]: {
-            justifyContent: "space-evently",
+            justifyContent: "space-evently!",
             "& .MuiOutlinedInput-input": {
                 fontSize: 20,
             },
@@ -73,7 +98,7 @@ const useStyles = makeStyles((theme) => ({
 
 function AddPrepodForm() {
     const classes = useStyles();
-    const {register, handleSubmit} = useForm([]);
+    const { register, handleSubmit } = useForm([]);
     const [open, setOpen] = useState(false);
     const [alertopen, setAlertOpen] = useState(true);
     const [result, setResult] = useState([]);
@@ -122,24 +147,44 @@ function AddPrepodForm() {
     };
     return (
         <div>
-            <PrepodTable list={list}/>
-            <button onClick={getList}>Отримати список викладачів</button>
+            <PrepodTable list={list} />
+            <Button color="primary" variant="outlined" onClick={getList}>Отримати список викладачів</Button>
             <form onSubmit={handleSubmit(onSubmit, onErr)} id="insert_prepod" className={classes.card}>
                 <div>
-                    <label>ПІП</label>
-                    <input type="text" ref={register} name="name"/>
+                    <TextField
+                        inputRef={register}
+                        id="group"
+                        name="group"
+                        type="number"
+                        label="Група"
+                    />
                 </div>
                 <div>
-                    <label>Група</label>
-                    <input ref={register} type="number" name="group"/>
+                    <TextField
+                        inputRef={register}
+                        id="name"
+                        type="text"
+                        name="name"
+                        label="ПІП"
+                    />
                 </div>
                 <div>
-                    <label>Логін</label>
-                    <input type="text" ref={register} name="login"/>
+                    <TextField
+                        inputRef={register}
+                        id="login"
+                        name="login"
+                        type="text"
+                        label="Логін"
+                    />
                 </div>
                 <div>
-                    <label>Пароль</label>
-                    <input type="text" ref={register} name="password"/>
+                    <TextField
+                        inputRef={register}
+                        id="password"
+                        name="password"
+                        type="text"
+                        label="Пароль"
+                    />
                 </div>
                 <Dialog
                     open={open}
@@ -159,7 +204,7 @@ function AddPrepodForm() {
                             Закрити
                         </Button>
                         <Button variant="contained" color="primary" type="submit" form="insert_prepod"
-                                onClick={handleClose}>
+                            onClick={handleClose}>
                             Добавити
                         </Button>
                     </DialogActions>
@@ -172,7 +217,7 @@ function AddPrepodForm() {
                 {result.message === 'Заповніть форму' ? (<Alert severity="info">
                     <AlertTitle>Info</AlertTitle>
                     <strong>{result.message}</strong>
-                </Alert>) : result.message === 'Помилка, логін вже існує' || result.message === 'Помилка, логін вже існує або такої групі не існує' ||result.message === 'Помилка, такої групи не існує' || result.message === "Помилка" || result.message === "Помилка БД" ? (
+                </Alert>) : result.message === 'Помилка, логін вже існує' || result.message === 'Помилка, логін вже існує або такої групі не існує' || result.message === 'Помилка, такої групи не існує' || result.message === "Помилка" || result.message === "Помилка БД" ? (
                     <div>
                         <Collapse in={alertopen}>
                             <Alert
@@ -186,7 +231,7 @@ function AddPrepodForm() {
                                             setAlertOpen(false);
                                         }}
                                     >
-                                        <CloseIcon fontSize="inherit"/>
+                                        <CloseIcon fontSize="inherit" />
                                     </IconButton>
                                 }
                             >
@@ -194,25 +239,25 @@ function AddPrepodForm() {
                             </Alert>
                         </Collapse>
                     </div>) : result.message === 'Успішно' ? ((<div>
-                    <Collapse in={alertopen}>
-                        <Alert
-                            action={
-                                <IconButton
-                                    aria-label="close"
-                                    color="inherit"
-                                    size="small"
-                                    onClick={() => {
-                                        setAlertOpen(false);
-                                    }}
-                                >
-                                    <CloseIcon fontSize="inherit"/>
-                                </IconButton>
-                            }
-                        >
-                            <strong>{result.message}</strong>
-                        </Alert>
-                    </Collapse>
-                </div>)) : (<div> </div>)}
+                        <Collapse in={alertopen}>
+                            <Alert
+                                action={
+                                    <IconButton
+                                        aria-label="close"
+                                        color="inherit"
+                                        size="small"
+                                        onClick={() => {
+                                            setAlertOpen(false);
+                                        }}
+                                    >
+                                        <CloseIcon fontSize="inherit" />
+                                    </IconButton>
+                                }
+                            >
+                                <strong>{result.message}</strong>
+                            </Alert>
+                        </Collapse>
+                    </div>)) : (<div> </div>)}
             </div>
         </div>
     );

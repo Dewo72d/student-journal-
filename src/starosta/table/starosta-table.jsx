@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -6,128 +6,93 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import ReactToExcel from "react-html-table-to-excel"
-import image from "../../img/print.webp"
+import ReactToExcel from "react-html-table-to-excel";
+import image from "../../img/print.webp";
 import ReactToPrint from "react-to-print";
-import "../../App.css"
-import { Button, Checkbox, FormControlLabel, Input } from "@material-ui/core";
+import {Button} from "@material-ui/core";
+
 function StarostaTable(props) {
     const componentRef = useRef();
     const [result, setResult] = useState([]); //Выборка
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const columns = [
-        { id: "code", label: "Имя" },
+        {id: "group", label: "Група"},
+        {id: "code", label: "Имя"},
+        {id: "lesson", label: "Пара №"},
+        {id: "mark", label: "Відмітка"},
+        {id: "date", label: "Дата"},
     ];
-    const lessons = [
-        {
-          value: "1",
-          label: "1",
-        },
-        {
-          value: "2",
-          label: "2",
-        },
-        {
-          value: "3",
-          label: "3",
-        },
-        {
-          value: "4",
-          label: "4",
-        },
-      ];
+
     //Отображение количества записей
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
-    const [lesson, setLesson] = useState(lessons[0].value);
+
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(+event.target.value);
-
         setPage(0);
     };
     //-------------------------
 
     //Перерисовка на основе выборки
     useEffect(() => {
-        fetch("http://localhost:4000/api/setstudents", {
-            method: "POST",
-            mode: "cors",
-            credentials: "include",
-            body: document.cookie,
-        }).then(async (res) => {
-            return await  res.json();
-        })
-        .then(async(res)=>{
-            return await setResult(res);
-        })
-    }, []);
-    //----------------------
-    useEffect(() => {
         setResult(props.selection);
     }, [props.selection]);
+    //----------------------
+
     return (
         <div>
             <TableContainer>
-                <form action="http://localhost:4000/api/marking" method="POST" mode="cors">
-                    <Table stickyHeader aria-label="sticky table" id="table-to-xls" ref={componentRef}>
-                        <TableHead>
-                            <TableRow>
-                                {columns.map((column) => (
-                                    <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{ minWidth: column.minWidth }}
+                <Table stickyHeader aria-label="sticky table" id="table-to-xls" ref={componentRef}>
+                    <TableHead>
+                        <TableRow>
+                            {columns.map((column) => (
+                                <TableCell
+                                    key={column.id}
+                                    align={column.align}
+                                    style={{minWidth: column.minWidth}}
+                                >
+                                    {column.label}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {result
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((result) => {
+                                return (
+                                    <TableRow
+                                        hover
+                                        role="checkbox"
+                                        tabIndex={-1}
+                                        key={Math.random()}
                                     >
-                                        {column.label}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {result
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((result) => {
-                                    return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox"
-                                            tabIndex={-1}
-                                            key={Math.random()}
-                                        >
-                                            <TableCell key={Math.random()}>
-                                            {result.value === 'undefined' ? ( <FormControlLabel
-                                                control={<Checkbox name="mark" value={result.fullName} checked={false}/>}
-                                                label={result.fullName}
-                                                />) : result.value === 'present' ? ( <FormControlLabel
-                                                    control={<Checkbox name="mark" value={result.fullName} checked={true}/>}
-                                                    label={result.fullName}
-                                                    />) : (<FormControlLabel
-                                                        control={<Checkbox name="mark" value={result.fullName}/>}
-                                                        label={result.fullName}
-                                                        />)}
-                                            </TableCell>
-                                            {/*-------------------------------------------------*/}
-                                        </TableRow>
-                                    );
-                                })}
-                        </TableBody>
-                    </Table>
-                    <div>
-          <label>Пара</label>
-          <select name="lesson">
-            {lessons.map((val) => (
-              <option key={val.value} value={val.value}>
-                {val.label}
-              </option>
-            ))}
-          </select>
-        </div>
-                    <Button variant="contained" color="secondary" type="submit">Відмітити</Button>
-                </form>
+                                        <TableCell key={Math.random()}>
+                                            {result.studentGroup}
+                                        </TableCell>
+                                        <TableCell key={Math.random()}>{result.fullName}</TableCell>
+                                        <TableCell key={Math.random()}>
+                                            {result.lessonNumber}
+                                        </TableCell>
+                                        <TableCell key={Math.random()}>
+                                            {/* ОСТОРОЖНО, МОЖНО ПОВРЕДИТЬ ГЛАЗА*/}
+                                            {/* Это нужно что бы "корректно" отображалась последняя строка в таблице*/}
+                                            {result.value === "absent" ? <b>Відсутній</b> : result.value === "present" ?
+                                                <i>Присутній</i> : ""}
+                                        </TableCell>
+                                        <TableCell key={Math.random()}>
+                                            {typeof result.Date === "undefined" ? "" : new Date(result.Date).toLocaleDateString()}
+                                        </TableCell>
+                                        {/*-------------------------------------------------*/}
+                                    </TableRow>
+                                );
+                            })}
+                    </TableBody>
+                </Table>
                 <TablePagination
-                    rowsPerPageOptions={[4, 10, 15, 20, 25, 30, 100]}
+                    rowsPerPageOptions={[5, 10, 15, 30]}
                     component="div"
                     count={result.length}
                     rowsPerPage={rowsPerPage}
@@ -147,9 +112,10 @@ function StarostaTable(props) {
                 sheet="sheet 1"
                 buttonText="Excel"
             />
-            <br />
+            <br/>
             <ReactToPrint
-                trigger={() => <Button variant="contained" color="secondary"><img src={image} alt="print" className="image" /></Button>}
+                trigger={() => <Button variant="outlined" size="medium" color="primary" style={{marginTop:".5em",marginBottom:".5em"}}><img src={image} alt="print"
+                                                                                  className="image"/></Button>}
                 content={() => componentRef.current}
             />
         </div>

@@ -25,7 +25,7 @@ const useStyles = makeStyles({
 })
 
 function UppdateForm() {
-    const {register, handleSubmit} = useForm();
+    const {handleSubmit} = useForm();
     const [result, setResult] = useState([]);
     const [open, setOpen] = useState(false);
     const [alertopen, setAlertOpen] = useState(true);
@@ -86,7 +86,7 @@ function UppdateForm() {
                         </Button>
                     </DialogActions>
                 </Dialog>
-                <Button className={classes.item} variant="contained" color="primary" onClick={handleOpen}>
+                <Button className={classes.item} variant="outlined" color="primary" onClick={handleOpen}>
                     Відправити
                 </Button>
                 { //----------------------------Alert }
