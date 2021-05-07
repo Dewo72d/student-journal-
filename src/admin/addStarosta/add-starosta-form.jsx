@@ -186,14 +186,6 @@ function AddStarostaForm() {
                         label="Пароль"
                     />
                 </div>
-                <div>
-                    <label>Логін</label>
-                    <input type="text" ref={register} name="login" />
-                </div>
-                <div>
-                    <label>Пароль</label>
-                    <input type="password" ref={register} name="psw" />
-                </div>
                 <Dialog
                     open={open}
                     onClose={handleClose}
