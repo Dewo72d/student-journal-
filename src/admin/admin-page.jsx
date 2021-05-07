@@ -24,7 +24,7 @@ const useStyles = makeStyles({
 function AdminPage() {
     const classes = useStyles();
     return (
-        <Paper>
+        <Paper className={classes.card}>
             <Accordion>
                 <AccordionSummary>
                     <Typography>Пошук студентів</Typography>

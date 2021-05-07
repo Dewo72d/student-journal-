@@ -6,6 +6,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import {FormControl, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
+    item:{
+        fontFamily: "Roboto,sanserif"
+    },
     card: {
         [theme.breakpoints.up("xs")]: {
             textAlign: "center",
@@ -145,7 +148,7 @@ function StarostaForm(props) {
     const onErr = (err) => console.error(err);
 
     return (
-        <div>
+        <div className={classes.item}>
             <div ref={componentRef}>
                 <StarostaTable groupStarosta={props.groupStarosta} selection={selection} />
             </div>
@@ -157,6 +160,7 @@ function StarostaForm(props) {
                         type="number"
                         name="group"
                         value={props.groupStarosta}
+                        label="Група"
                     />
                 </div>
                 <div>

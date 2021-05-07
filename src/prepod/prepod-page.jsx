@@ -1,15 +1,18 @@
-import React, {useEffect, useState} from "react";
+import { Paper } from "@material-ui/core";
+import React, { useEffect, useState } from "react";
 import Prepodform from "./prepodForm/prepod-form";
 
 
 function PrepodPage(props) {
-let [group, setGroup] = useState(0);
+    let [group, setGroup] = useState(0);
 
     useEffect(() => {
         setGroup(props.groupPrepod)
     }, [props]);
 
-    return (<Prepodform groupPrepod={group}/>);
+    return (
+
+        <Paper><Prepodform groupPrepod={group} /></Paper>);
 }
 
 export default PrepodPage;

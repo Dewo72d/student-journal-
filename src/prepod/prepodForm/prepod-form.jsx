@@ -1,74 +1,74 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Button from "@material-ui/core/Button";
 import PrepodTable from "../table/prepod-table";
 import { makeStyles } from "@material-ui/core/styles";
-import { Checkbox, FormControl, FormControlLabel,InputLabel, MenuItem,Select, TextField } from "@material-ui/core";
+import { Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
+    item: {
+        fontFamily: "Roboto, sans-serif",
+    },
     card: {
         [theme.breakpoints.up("xs")]: {
             textAlign: "center",
             "& .MuiFormControl-root": {
                 marginBottom: "1em",
             },
-            "& Button":{
-                marginBottom: "1em"
-            }
         },
         [theme.breakpoints.up("sm")]: {
             alignItems: "center",
             display: "flex",
-            flexWrap:"wrap",
+            flexWrap: "wrap",
             justifyContent: "space-between",
             "& #name": {
                 width: "16rem",
             },
-            "& #group":{
+            "& #group": {
                 width: "2rem",
             },
-            "& .MuiInputBase-input":{
+            "& .MuiInputBase-input": {
                 fontSize: "13px",
                 height: "2.1876em",
             },
-            "& .MuiTypography-body1":{
+            "& .MuiTypography-body1": {
                 fontSize: "12px",
             },
-            "& input#date":{
+            "& input#date": {
                 padding: "20px 12px 10px",
             },
-            "& Button":{
+            "& Button": {
                 fontSize: "13px",
             },
-            "& .MuiFormLabel-root":{
+            "& .MuiFormLabel-root": {
                 fontSise: "11px",
             },
-            "& .MuiFormControl-root":{
+            "& .MuiFormControl-root": {
                 marginBottom: "1em"
             }
         },
-        
+
         [theme.breakpoints.up("md")]: {
             display: "flex",
             justifyContent: "space-between",
             "& #name": {
                 width: "20rem",
             },
-            "& #group":{
+            "& #group": {
                 width: "4rem",
             },
-            "& .MuiInputBase-input":{
+            "& .MuiInputBase-input": {
                 fontSize: "17px",
                 height: "2.1876em",
             },
-            "& .MuiTypography-body1":{
+            "& .MuiTypography-body1": {
                 fontSize: "12px",
             },
-            "& input#date":{
+            "& input#date": {
                 padding: "20px 12px 10px",
             },
         },
-        
+
         [theme.breakpoints.up("lg")]: {
             justifyContent: "space-evently!",
             "& .MuiOutlinedInput-input": {
@@ -117,7 +117,6 @@ function PrepodFilterForm(props) {
     const { register, handleSubmit, control } = useForm(); // initialize the hook
     const [selection, setSelection] = useState([]);
     const [lessonData, setLessons] = useState([]);
-    const [group,setGroup] = useState([]);
     const handleLesson = (e) => {
         setLessons(e.target.value);
         console.log(e);
@@ -145,25 +144,23 @@ function PrepodFilterForm(props) {
                 console.log(err);
             }, []);
     };
-    useEffect(() => {
-        setGroup(props.groupPrepod)
-    }, [props]);
     //--------------------------------
     const onErr = (err) => console.error(err);
 
     return (
-        <div>
+        <div className={classes.item}>
             <div ref={componentRef}>
                 <PrepodTable selection={selection} />
             </div>
-            <form  onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
-            <div>
+            <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
+                <div>
                     <TextField
                         inputRef={register}
                         id="group"
                         type="number"
                         name="group"
-                        value={group}
+                        value={props.groupPrepod}
+                        label="Група"
                     />
                 </div>
                 <div>
