@@ -70,13 +70,13 @@ function StarostaTable(props) {
                                         >
                                             <TableCell key={Math.random()}>
                                             {result.value === 'undefined' ? ( <FormControlLabel
-                                                control={<Checkbox name="mark" value={result.fullName} checked={false}/>}
+                                                control={<Checkbox color="primary" name="mark" value={result.fullName} checked={false}/>}
                                                 label={result.fullName}
                                                 />) : result.value === 'present' ? ( <FormControlLabel
-                                                    control={<Checkbox name="mark" value={result.fullName} checked={true}/>}
+                                                    control={<Checkbox color="primary" name="mark" value={result.fullName} checked={true}/>}
                                                     label={result.fullName}
                                                     />) : (<FormControlLabel
-                                                        control={<Checkbox name="mark" value={result.fullName}/>}
+                                                        control={<Checkbox color="primary" name="mark" value={result.fullName}/>}
                                                         label={result.fullName}
                                                         />)}
                                             </TableCell>

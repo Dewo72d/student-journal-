@@ -16,6 +16,7 @@ router.use("/api/addnewprepod", controller.insertingPrepod);
 router.use("/api/getstarosta", controller.getStarosta);
 router.use("/api/getprepod", controller.getPrepod);
 router.use("/api/deleteprepod", controller.deletePrepod);
+router.use("/api/logOut",controller.logOut);
 
 app.use(function (err, req, res) {
     console.error(err.stack);

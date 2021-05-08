@@ -275,6 +275,14 @@ exports.deletingStudent = (req, res) => {
         });
     }
 };
+exports.logOut = (req,res) =>{
+    const token = jwt.sign({}, jwtSecret, {
+      expiresIn: 0,
+    });
+    res.cookie("auth", `${token}`);
+    res.redirect("http://localhost:3000/api/logOut");
+    res.status(401);
+}
 exports.marking = (req,res)=>{
     let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`);
     let group = validator(() => req.body.group === "", () => "", () => `students.studentGroup = ${req.body.group}`);
