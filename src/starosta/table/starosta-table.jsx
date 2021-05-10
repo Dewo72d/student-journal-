@@ -1,118 +1,129 @@
-import React, {useEffect, useRef, useState} from "react";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TablePagination from "@material-ui/core/TablePagination";
-import TableRow from "@material-ui/core/TableRow";
-import ReactToExcel from "react-html-table-to-excel";
-import image from "../../img/print.webp";
-import ReactToPrint from "react-to-print";
-import {Button, Checkbox, FormControlLabel} from "@material-ui/core";
-
-function StarostaTable(props) {
-    const componentRef = useRef();
+import React, {useEffect,useState} from "react";
+import UpdateForm from "../filter-form/filter-form";
+import {Controller, useForm} from "react-hook-form";
+import { Button, FormControl, InputLabel, makeStyles, MenuItem, Select } from "@material-ui/core";
+const useStyles = makeStyles({
+    btn:{
+        marginBottom: "1em",
+        marginTop: "1em",
+        marginLeft: "1em"
+    },
+    mark:{
+        fontSize: "20px"
+    }
+})
+function StarostaTable(prop) {
+    const [valid, setValid] = useState(" ");
     const [result, setResult] = useState([]); //Выборка
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
-    const columns = [
-        {id: "code", label: "Ім'я"},
+    const [message, setMessage] = useState("");//Сообщение о рещьтате добавление отметок
+    const {register, handleSubmit,control} = useForm(); // initialize the hook
+
+    const lessons = [
+        {
+            value: "1",
+            label: "1",
+        },
+        {
+            value: "2",
+            label: "2",
+        },
+        {
+            value: "3",
+            label: "3",
+        },
+        {
+            value: "4",
+            label: "4",
+        },
     ];
-
-    //Отображение количества записей
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(+event.target.value);
-        setPage(0);
-    };
-    //-------------------------
-
+    const [lesson, setLesson] = useState(lessons[0].value);
     //Перерисовка на основе выборки
     useEffect(() => {
-        setResult(props.selection.splice(0,props.selection.length - 1));
-    }, [props.selection]);
-    useEffect(() => {
-        setResult(props.list);
-    }, [props.list]);
-    //----------------------
+        fetch("http://localhost:4000/api/setstudents", {
+            method: "POST",
+            mode: "cors",
+            credentials: "include",
+            body: document.cookie,
+        }).then(async (res) => {
+            return await res.json();
+        })
+            .then((res) => {
+                return setResult(res);
+            });
+    }, []);
 
+    const onSubmitMark = async (data) => {
+        // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
+        let formData = new FormData();
+        let arrData = [];
+        for (let key in data) {
+            if (data[key] !== "absent" && data[key] !== "present" && ![1, 2, 3, 4].some(i => i === +(data.lesson))) return setValid(`Помилка, юний хакер > ${data[key]} <`);
+            if (data[key] === null) return setValid("ПОМИЛКА");
+            arrData.push(`{"${String(key)}": "${String(data[key])}"}`);
+        }
+        arrData.push(`{"group": "${prop.group}"}`);
+        formData.append('students', `[${arrData}]`);
+
+        //Отправка формы в бд на выборку
+        await fetch("http://localhost:4000/api/marking", {
+            method: "POST",
+            mode: "cors",
+            body: formData,
+        })
+            .then(async (res) => {
+                setMessage(await res.json());
+            })
+            .catch((err) => {
+                console.log(err);
+            }, []);
+
+    };
+
+    const onErr = (err) => console.error(err);
+const classes = useStyles();
     return (
         <div>
-            <TableContainer>
-                <Table stickyHeader aria-label="sticky table" id="table-to-xls" ref={componentRef}>
-                    <TableHead>
-                        <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    align={column.align}
-                                    style={{minWidth: column.minWidth}}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                            {result
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((result) => {
-                                    return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox"
-                                            tabIndex={-1}
-                                            key={Math.random()}
-                                        >
-                                            <TableCell key={Math.random()}>
-                                            {result.value === 'undefined' ? ( <FormControlLabel
-                                                control={<Checkbox color="primary" name="mark" value={result.fullName} checked={false}/>}
-                                                label={result.fullName}
-                                                />) : result.value === 'present' ? ( <FormControlLabel
-                                                    control={<Checkbox color="primary" name="mark" value={result.fullName} checked={true}/>}
-                                                    label={result.fullName}
-                                                    />) : (<FormControlLabel
-                                                        control={<Checkbox color="primary" name="mark" value={result.fullName}/>}
-                                                        label={result.fullName}
-                                                        />)}
-                                            </TableCell>
-                                            {/*-------------------------------------------------*/}
-                                        </TableRow>
-                                    );
-                                })}
-                        </TableBody>
-                </Table>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 15, 30]}
-                    component="div"
-                    count={result.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={handleChangePage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                />
-            </TableContainer>
+            <form onSubmit={handleSubmit(onSubmitMark, onErr)} id="starostaForm" name="starostaForm">
+                {result.map((i) => {
+                    return (
+                        <div key={Math.random()}>
+                            <hr/>
+                            <h3>№{i.id} {i.fullName}</h3>
+                            <label>Присутній</label>
+                            <input type="radio" name={i.id} value="present" ref={register}/>
+                            <label>Відсутній</label>
+                            <input type="radio" name={i.id} value="absent" ref={register}/>
+                            <hr/>
+                        </div>
+                    );
+                })}
+                   <FormControl>
+                        <InputLabel>
+                            Пара
+                        </InputLabel>
+                        <Controller
+                            as={
+                                <Select value={lesson} onChange={e => setLesson(e.target.value)}>
+                                    {lessons.map((res) => (
+                                        <MenuItem key={res.value} value={res.value}>{res.label}</MenuItem>
+                                    ))}
+                                </Select>
+                            }
+                            name="lesson"
+                            id="lesson"
+                            defaultValue={lessons[0].value}
+                            control={control}
+                        />
+                    </FormControl>
+                <Button className={classes.btn} type="submit" color="primary" variant="outlined" form="starostaForm">Відправити</Button>
+            </form>
+            Нажмите на текст что бы убрать
+            <h1 onClick={() => setMessage("")}>{message.message}</h1>
+            <h1 onClick={() => setValid(null)}>{valid}</h1>
+            <hr/>
             <div>
-                <p>Відсутніх - {result.map(i => i.countAbsent)}</p>
-                <p>Присутніх - {result.map(i => i.countPresent)}</p>
+                <UpdateForm studetns={result} group={prop.group}/>
             </div>
-            <ReactToExcel
-                className="download-table-xls-button"
-                table="table-to-xls"
-                filename="excelFile"
-                sheet="sheet 1"
-                buttonText="Excel"
-            />
-            <br/>
-            <ReactToPrint
-                trigger={() => <Button variant="outlined" size="medium" color="primary" style={{marginTop:".5em",marginBottom:".5em"}}><img src={image} alt="print"
-                                                                                  className="image"/></Button>}
-                content={() => componentRef.current}
-            />
         </div>
     );
 }
