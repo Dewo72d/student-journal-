@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import admin from "./admin/admin-page";
 import loginPage from "./login/login-page/login-page";
-import starosta from "./starosta/starosta-page";
+import Starosta from "./starosta/starosta-page";
 import manager from "./manager/manager-page";
 import Teacher from "./prepod/prepod-page";
 import {BrowserRouter, Route, Redirect} from "react-router-dom";
@@ -38,7 +38,7 @@ function App() {
         <BrowserRouter>
             <Redirect push to={path.path}/>
             <Route render={()=> <Teacher groupPrepod={groupPrepod} />} path="/teacher" />
-            <Route path="/starosta" component={starosta}/>
+            <Route render={()=> <Starosta groupPrepod={groupPrepod} />} path="/starosta"/>
             <Route path="/mypage" component={admin}/>
             <Route path="/manager" component={manager}/>
         </BrowserRouter>

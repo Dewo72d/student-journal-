@@ -38,7 +38,7 @@ exports.login = (req, res) => {
 
     db.connection.query(`SELECT * FROM ${role} WHERE login = '${login}'`, (err, result) => {
         if (err) return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
-        let group = typeof result === "undefined" ? () => {
+        let group = result.length === 0 ? () => {
             return res.status(401).json(`${new Error("Невірний  логін або пароль")}`);
         } : typeof result[0].starostaGroup === "undefined" ? typeof result[0].prepodGroup === "undefined" ? 0 : result[0].prepodGroup : result[0].starostaGroup;
         if (result.length === 0) {
@@ -56,7 +56,7 @@ exports.login = (req, res) => {
                     },
                     Object.values(jwtSecret)[0],
                     {
-                        expiresIn: 60 * 2,
+                        expiresIn: 60 * 5,
                     },
                     (err, token) => {
                         if (err) throw new Error(err);
@@ -95,23 +95,6 @@ exports.addNewUser = (req, res) => {
         }
     });
 };
-//Добавление нового старосты
-exports.addNewStarosta = (req, res) => {
-    const {fullName, group, login, password, role} = req.body;
-
-    db.connection.query(`SELECT * FROM ${role} WHERE login = ${login}`, (err, result) => {
-        if (result.length > 0) {
-            return (
-                res.status(401).json(
-                    `${new Error("Такий логін вже існує")}`
-                )
-            );
-        } else {
-            db.connection.query(`INSERT INTO ${role} (starostaName, Group, login, password) VALUES(${fullName},${group}, ${login}, ${password})`);
-            /*???????????????????????????*/
-        }
-    });
-};
 
 //Выборка в админке
 exports.selection = (req, res) => {
@@ -143,7 +126,8 @@ exports.selection = (req, res) => {
 };
 //Вивід студентів 
 exports.students = (req, res) => {
-    jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
+    jwt.verify(req.cookies.auth, jwtSecret, (err, decode) => {
+        console.log(decode, err);
         res.set("Access-Control-Allow-Origin", req.headers.origin); //<<КОСТЫЛЬ!? << ООооХ, эти 2 строки что бы можно было отправлять статус коды.
         res.set("Access-Control-Allow-Credentials", "true");        //<<КОСТЫЛЬ!? << Без них  CORS начитает ругатся, хотя он и без этого рукается.
         let {group} = jwt.decode(req.cookies.auth);
@@ -158,8 +142,6 @@ exports.students = (req, res) => {
     });
 };
 exports.student = (req, res) => {
-    let name = validator(() => req.body.name === "", () => "", () => `AND students.fullName LIKE '%${req.body.name}%'`);
-    console.log(req.body);
     const lesson = req.body.lesson;
     let countA = 0;
     let countP = 0;
@@ -183,49 +165,40 @@ exports.student = (req, res) => {
 };
 //Відмітка
 exports.marking = (req, res) => {
-    jwt.verify(req.cookies.auth, Object.values(jwtSecret)[0], (err, decode) => {
-        res.set("Access-Control-Allow-Origin", req.headers.origin); //<<КОСТЫЛЬ!? << ООооХ, эти 2 строки что бы можно было отправлять статус коды.
-        res.set("Access-Control-Allow-Credentials", "true");        //<<КОСТЫЛЬ!? << Без них  CORS начитает ругатся, хотя он и без этого рукается.
-        let {group} = jwt.decode(req.cookies.auth);
-        const name = req.body.mark;
-        const lesson = req.body.lesson;
-        let today = new Date().toISOString().slice(0, 10);
-        let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
-        db.connection.query(sql, (err, result) => {
-            if (err) console.log(err);
-            for (let i = 0; i < result.length; i++) {
-                let present = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','present','${today}')`;
-                let absent = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','absent','${today}')`;
-                if (Array.isArray(name)) {
-                    if (name[i] == result[i].fullName) {
-                        db.connection.query(present, (err_present, result_present) => {
-                            if (err) console.log(err_present);
-                            console.log(result_present);
-                        });
-                    } else {
-                        db.connection.query(absent, (err_absent, result_absent) => {
-                            if (err) console.log(err_absent);
-                            console.log(result_absent);
-                        });
-                    }
-                } else {
-                    if (name == result[i].fullName) {
-                        db.connection.query(present, (err_present, result_present) => {
-                            if (err) console.log(err_present);
-                            console.log(result_present);
-                        });
-                    } else {
-                        db.connection.query(absent, (err_absent, result_absent) => {
-                            if (err) console.log(err_absent);
-                            console.log(result_absent);
-                        });
-                    }
-                }
-            }
+    const values = JSON.parse(req.body.students);
+    const students = values.slice(0, -2);
+    const data = values.slice(-2);
+    const today = new Date().toISOString().slice(0, 10);
+
+    let queryValues = `INSERT INTO lesson (value, studentId,lessonNumber,Date) VALUES `;
+    for (let i in students) {
+        //Генерация запроса
+        queryValues += `('${Object.values(students[i])}', ${Object.keys(students[i])},${Object.values(data[0])},"${today}"),`;
+    }
+    db.connection.query(queryValues.slice(0, -1), (err, result) => {
+        if (err) return res.status(500).json({
+            message: `Помилка - Ви вже відправляли відміткі`,
         });
-        res.redirect("http://localhost:3000/starosta");
+        return res.status(200).json({
+            message: "Успішно!",
+        });
     });
 };
+
+exports.updateMarking = (req, res) => {
+    const values = JSON.parse(req.body.students);
+    const today = new Date().toISOString().slice(0, 10);
+    console.log(`UPDATE lesson SET lessonNumber=${values[0].lessonUpdate}, value='${values[2].mark}' WHERE studentId=${values[1].student} AND DATE(Date) = STR_TO_DATE('${today}','%Y-%m-%d')`)
+    db.connection.query(`UPDATE lesson SET value='${values[2].mark}' WHERE studentId=${values[1].student} AND DATE(Date) = STR_TO_DATE('${today}','%Y-%m-%d') AND lessonNumber=${values[0].lessonUpdate}`, (err, result) => {
+        if (err) return res.status(500).json({
+            message: `Помилка`,
+        });
+        return res.status(200).json({
+            message: "Успішно!",
+        });
+    });
+};
+
 //Добавление новго студента в админке
 exports.insertingStudent = (req, res) => {
     const name = req.body.name;
@@ -335,59 +308,6 @@ exports.deletingStudent = (req, res) => {
             }
         });
     }
-};
-
-//Отметки
-exports.marking = (req, res) => {
-    const name = req.body.mark;
-    const group = req.body.group;
-    const lesson = req.body.lesson;
-    let today = new Date().toISOString().slice(0, 10);
-    let sql = `SELECT * FROM students WHERE studentGroup = '${group[0]}'`;
-    db.connection.query(sql, (err, result) => {
-            if (err) console.log(err);
-            for (let i = 0; i < result.length; i++) {
-                let present = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','present','${today}')`;
-                let absent = `INSERT INTO lesson (lessonNumber,studentId,value,Date) VALUES ('${lesson}','${result[i].id}','absent','${today}')`;
-                if (Array.isArray(name)) {
-                    if (name[i] === result[i].fullName) {
-                        db.connection.query(present, (err_present, result_present) => {
-                            if (err) console.log(err_present);
-                            console.log(result_present);
-                        });
-                    } else {
-                        db.connection.query(absent, (err_absent, result_absent) => {
-                            if (err) console.log(err_absent);
-                            console.log(result_absent);
-                        });
-                    }
-                } else {
-                    if (name === result[i].fullName) {
-                        db.connection.query(present, (err_present, result_present) => {
-                            if (err) console.log(err_present);
-                            console.log(result_present);
-                        });
-                    } else {
-                        db.connection.query(absent, (err_absent, result_absent) => {
-                            if (err) console.log(err_absent);
-                            console.log(result_absent);
-                        });
-                    }
-                }
-            }
-            res.redirect("http://localhost:3000/teacher");
-        }
-    );
-};
-
-// ?????????
-exports.students = (req, res) => {
-    let group = req.body.group;
-    let sql = `SELECT * FROM students WHERE studentGroup = '${group}'`;
-    db.connection.query(sql, (err, result) => {
-        if (err) return res.status(500).json({message: "Помилка"});
-        return res.send(result);
-    });
 };
 
 //Получить всех старост

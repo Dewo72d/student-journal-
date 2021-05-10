@@ -13,7 +13,7 @@ router.use("/api/addstudents", controller.insertingStudent);
 router.use("/api/deletstudents", controller.deletingStudent);
 router.use("/api/uppdatestudents", controller.uppdateStudent);
 router.use("/api/marking", controller.marking);
-router.use("/api/setstudents", controller.students);
+router.use("/api/updatemark", controller.updateMarking);
 router.use("/api/addnewstarosta", controller.insertingStarosta);
 router.use("/api/addnewprepod", controller.insertingPrepod);
 router.use("/api/getstarosta", controller.getStarosta);
