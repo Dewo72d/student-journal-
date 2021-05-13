@@ -1,7 +1,7 @@
 import React, {useState, useRef} from "react";
 import {useForm} from "react-hook-form";
 import Button from "@material-ui/core/Button";
-import AdminTable from "../table/admin-table";
+import PrepodTable from "../table/prepod-table";
 import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -89,18 +89,20 @@ const lessons = [
     },
 ];
 
-function FilterForm() {
+function PrepodFilterForm(props) {
     const componentRef = useRef();
     const classes = useStyles();
     const {register, handleSubmit} = useForm(); // initialize the hook
     const [selection, setSelection] = useState([]);
 
     const onSubmit = async (data) => {
+
         // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
         let formData = new FormData();
         for (let key in data) {
             formData.append(key, data[key]);
         }
+        formData.append("group", props.groupPrepod);
 
         //----Отправка формы в бд на выборку------
         await fetch("http://localhost:4000/api/selection", {
@@ -124,13 +126,10 @@ function FilterForm() {
     return (
         <div>
             <div ref={componentRef}>
-                <AdminTable selection={selection}/>
+                <PrepodTable selection={selection}/>
             </div>
             <form onSubmit={handleSubmit(onSubmit, onErr)} className={classes.card}>
-                <div>
-                    <label>Група</label>
-                    <input ref={register} type="number" name="group"/>
-                </div>
+
                 <div>
                     <label>ПІП</label>
                     <input type="text" ref={register} name="name"/>
@@ -159,4 +158,4 @@ function FilterForm() {
     );
 }
 
-export default FilterForm;
+export default PrepodFilterForm;

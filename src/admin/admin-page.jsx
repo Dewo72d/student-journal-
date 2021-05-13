@@ -1,17 +1,25 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import FilterForm from "./filter-form/filter-form";
 import Paper from "@material-ui/core/Paper";
-import {Accordion, AccordionDetails, AccordionSummary, makeStyles, Typography} from "@material-ui/core";
-
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    makeStyles,
+    Typography,
+} from "@material-ui/core";
 import AddForm from "./addStudents/add-form";
-import DeleteForm from "./deleteStudents/delete-form";
 import UppdateForm from "./uppdateStudentsGroup/uppdate-form";
+import DeleteForm from "./deleteStudents/delete-form";
+import AddStarostaForm from "./addStarosta/add-starosta-form";
+import AddPrepodPage from "./addPrepod/add-prepod-form";
+import DeletePrepodForm from "./deletePrepod/delete-prepod-form";
 
 const useStyles = makeStyles({
     card: {
-        display: "block"
-    }
-})
+        display: "block",
+    },
+});
 
 function AdminPage() {
     const classes = useStyles();
@@ -38,7 +46,6 @@ function AdminPage() {
                     <Typography>Перевід на новий курс</Typography>
                 </AccordionSummary>
                 <AccordionDetails className={classes.card}>
-
                     <UppdateForm/>
                 </AccordionDetails>
             </Accordion>
@@ -48,6 +55,30 @@ function AdminPage() {
                 </AccordionSummary>
                 <AccordionDetails className={classes.card}>
                     <DeleteForm/>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion>
+                <AccordionSummary>
+                    <Typography>Добавлення старост</Typography>
+                </AccordionSummary>
+                <AccordionDetails className={classes.card}>
+                    <AddStarostaForm/>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion>
+                <AccordionSummary>
+                    <Typography>Добавлення викладача</Typography>
+                </AccordionSummary>
+                <AccordionDetails className={classes.card}>
+                    <AddPrepodPage/>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion>
+                <AccordionSummary>
+                    <Typography>Видалення викладача</Typography>
+                </AccordionSummary>
+                <AccordionDetails className={classes.card}>
+                    <DeletePrepodForm/>
                 </AccordionDetails>
             </Accordion>
         </Paper>

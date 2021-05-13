@@ -12,7 +12,7 @@ import {
     IconButton
 } from "@material-ui/core";
 import {Alert, AlertTitle} from "@material-ui/lab";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@material-ui/icons/Close"
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function DeleteForm() {
+function DeletePrepodForm() {
     const classes = useStyles();
     const {register, handleSubmit} = useForm(); // initialize the hook
     const [result, setResult] = useState([]);
@@ -91,7 +91,7 @@ function DeleteForm() {
         }
         //--------------------------------
         //Отправка формы в бд на выборку
-        await fetch("http://localhost:4000/api/deletstudents", {
+        await fetch("http://localhost:4000/api/deleteprepod", {
             method: "POST",
             mode: "cors",
             body: formData,
@@ -111,7 +111,7 @@ function DeleteForm() {
 
     return (
         <div>
-            <form onSubmit={handleSubmit(onSubmit, onErr)} id="myform2" className={classes.card}>
+            <form onSubmit={handleSubmit(onSubmit, onErr)} id="deletPrepodForm" className={classes.card}>
                 <div>
                     <label>Група</label>
                     <input ref={register} type="number" name="group"/>
@@ -129,14 +129,14 @@ function DeleteForm() {
                     <DialogTitle id="alert-dialog-title">{"Видалити студента?"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            Ви впевнені,що хочете видалити студента?
+                            Ви впевнені,що хочете видалити викладача?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose} color="primary">
                             Закрити
                         </Button>
-                        <Button variant="contained" color="primary" type="submit" form="myform2" onClick={handleClose}>
+                        <Button variant="contained" color="primary" type="submit" form="deletPrepodForm" onClick={handleClose}>
                             Продовжити
                         </Button>
                     </DialogActions>
@@ -145,11 +145,11 @@ function DeleteForm() {
                     Відправити
                 </Button>
             </form>
-            <div className={classes.alert}>{result.message === 'Ви не ввели студента чи групу' ? (
+            <div className={classes.alert}>{result.message === 'Ви не ввели викладача чи групу' ? (
                 <Alert severity="info">
                     <AlertTitle>Info</AlertTitle>
                     <strong>{result.message}</strong>
-                </Alert>) : result.message === 'Такого студента немає' ? (<div>
+                </Alert>) : result.message === 'Викладача або групи не існує'  ? (<div>
                 <Collapse in={alertopen}>
                     <Alert
                         severity="warning"
@@ -169,7 +169,7 @@ function DeleteForm() {
                         <strong>{result.message}</strong>
                     </Alert>
                 </Collapse>
-            </div>) : result.message === 'Студента було видалено' ? (<div>
+            </div>) : result.message === 'Викладача було видалено' ? (<div>
                 <Collapse in={alertopen}>
                     <Alert
                         action={
@@ -194,4 +194,4 @@ function DeleteForm() {
     );
 }
 
-export default DeleteForm;
+export default DeletePrepodForm;
