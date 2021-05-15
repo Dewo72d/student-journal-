@@ -161,11 +161,9 @@ exports.students = (req, res) => {
 //Відмітка
 exports.marking = (req, res) => {
     const values = JSON.parse(req.body.students);
-    console.log(values);
     const students = values.slice(0, -2);
     const data = values.slice(-2);
     const today = new Date().toISOString().slice(0, 10);
-
     let queryValues = `INSERT INTO lesson (value, studentId,lessonNumber,Date) VALUES `;
     for (let i in students) {
         //Генерация запроса
@@ -173,7 +171,7 @@ exports.marking = (req, res) => {
     }
     db.connection.query(queryValues.slice(0, -1), (err, result) => {
         if (err) return res.status(500).json({
-            message: `Помилка - Ви вже відправляли відміткі`,
+            message: "Помилка - Ви вже відправляли відміткі",
         });
         return res.status(200).json({
             message: "Успішно!",
@@ -185,8 +183,8 @@ exports.updateMarking = (req, res) => {
     const values = JSON.parse(req.body.students);
     console.log(values);
     const today = new Date().toISOString().slice(0, 10);
-    console.log(`UPDATE lesson SET lessonNumber=${values[1].lessonUpdate}, value='${values[0].mark}' WHERE studentId=${values[2].student} AND DATE(Date) = STR_TO_DATE('${today}','%Y-%m-%d')`)
-    db.connection.query(`UPDATE lesson SET value='${values[0].mark}' WHERE studentId=${values[2].student} AND DATE(Date) = STR_TO_DATE('${today}','%Y-%m-%d') AND lessonNumber=${values[1].lessonUpdate}`, (err, result) => {
+    console.log(`UPDATE lesson SET lessonNumber=${values[0].lessonUpdate}, value='${values[2].mark}' WHERE studentId=${values[1].student} AND DATE(Date) = STR_TO_DATE('${today}','%Y-%m-%d')`)
+    db.connection.query(`UPDATE lesson SET value='${values[2].mark}' WHERE studentId=${values[1].student} AND DATE(Date) = STR_TO_DATE('${today}','%Y-%m-%d') AND lessonNumber=${values[0].lessonUpdate}`, (err, result) => {
         if (err) return res.status(500).json({
             message: `Помилка`,
         });

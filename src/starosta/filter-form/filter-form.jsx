@@ -1,30 +1,33 @@
-import React, {useEffect, useState} from "react";
-import {Controller,useForm} from "react-hook-form";
-import {makeStyles} from "@material-ui/core/styles";
-import {Button, FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { makeStyles } from "@material-ui/core/styles";
+import { Button, FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, Snackbar } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme) => ({
-    select:{
-      [theme.breakpoints.down("sm")]: {
-        width: "20em",
-        marginBottom: "1em",
+    select: {
+        [theme.breakpoints.down("sm")]: {
+            width: "16em",
+            marginBottom: "1em",
+        },
+        [theme.breakpoints.down("lg")]: {
+            marginBottom: "1em",
+            width: "18em",
+            marginLeft: "1em",
+        },
+        [theme.breakpoints.down("xs")]: {
+            marginLeft: "5px",
+            width: "14em",
+            "& .MuiSelect-select.MuiSelect-select": {
+                fontSize: "14px",
+            },
+        },
     },
-    [theme.breakpoints.down("lg")]: {
-        marginBottom: "1em",
-        width: "20em",
-        marginLeft: "1em"
-    },
-    [theme.breakpoints.down("xs")]: {
-        marginLeft: 0,
-        marginTop: "1em"
-    },
-    },
-    mark:{
+    mark: {
         fontSize: "20px"
     },
     card: {
         [theme.breakpoints.down("xs")]: {
-            color: "red",
             display: "flex",
             flexWrap: "wrap",
             flexDirection: "column",
@@ -37,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
             justifyContent: "space-between",
             flexWrap: "wrap",
             "& .MuiOutlinedInput-input": {
-                fontSize: 18,
+                fontSize: 17,
                 hight: 20,
                 marginTop: 10
             },
@@ -61,11 +64,12 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.up("lg")]: {
             justifyContent: "space-evently",
             "& .MuiOutlinedInput-input": {
-                fontSize: 20,
+                fontSize: 18,
             },
             "& Button": {
                 fontSize: 30,
                 height: 75,
+                padding: "1em"
             },
             "& #name": {
                 width: "25rem",
@@ -96,24 +100,31 @@ const lessons = [
 function FilterForm(prop) {
     const [message, setMessage] = useState("");//Сообщение о рещьтате добавление отметок
     const classes = useStyles();
-    const {register, handleSubmit, control} = useForm(); // initialize the hook
-    const [valid, setValid] = useState(" ");
+    const {handleSubmit, control } = useForm(); // initialize the hook
+    const [valid, setValid] = useState("");
     const [studentsProps, setStudentsProps] = useState([]);
     const [lesson, setLesson] = useState(lessons[0].value);
+    const [alertopen, setAlertToOpen] = useState(true);
+    const handleClose = () => {
+        setAlertToOpen(false);
+    }
     useEffect(() => {
         setStudentsProps(prop.studetns);
     }, [prop.studetns]);
     //----------------------
 
     const onSubmitUpdate = async (dataUpdate) => {
+        setAlertToOpen(true);
+        setMessage("");
+        setValid("");
         // Берёт значение с формы и конвертирует их в нужный формат для отправки на сервер
         let formData = new FormData();
         let arrData = [];
-        console.log(dataUpdate.mark !== 'present'|| dataUpdate.mark !== "absent");
+        console.log(dataUpdate.mark !== 'present' || dataUpdate.mark !== "absent");
         for (let key in dataUpdate) {
             //Валидация входящих данныхlessonUpdate
-            if(dataUpdate.mark !== "absent" && dataUpdate.mark !== "present") return setValid(`Помилка, юний хакер > не ламай форму <`);
-            if (![1, 2, 3, 4].some(i => i === +(dataUpdate.lessonUpdate))) return setValid(`Помилка, юний хакер > ${dataUpdate[key]} <`);
+            if (dataUpdate.mark !== "absent" && dataUpdate.mark !== "present") return setValid(`Помилка, юний хакер > не ламай форму <`);
+            if (![1, 2, 3, 4].some(i => i === +(dataUpdate.lessonUpdate))) return setValid(`Помилка, юний хакер`);
             if (dataUpdate[key] === null) return setValid("ПОМИЛКА");
             arrData.push(`{"${String(key)}": "${String(dataUpdate[key])}"}`);
         }
@@ -126,7 +137,7 @@ function FilterForm(prop) {
             body: formData,
         })
             .then(async (res) => {
-                 setMessage(await res.json());
+                setMessage(await res.json());
             })
             .catch((err) => {
                 console.log(err);
@@ -136,59 +147,90 @@ function FilterForm(prop) {
     const onErr = (err) => console.error(err);
 
     return (
-        <div>
-            <form onSubmit={handleSubmit(onSubmitUpdate, onErr)} className={classes.card}>
+        <div style={{ padding: "1.5em" }}>
+            <form onSubmit={handleSubmit(onSubmitUpdate, onErr)} className={classes.card} style={{ border: "1px solid grey", borderRadius: "1em", padding: "1em" }}>
                 <div>
-                    <h2>Виправити</h2>
-                    <div>
-                        <h1>{valid}</h1>
+                    <FormLabel style={{ fontSize: "20px"}}>Виправити</FormLabel>
+                    <div style={{marginTop: "1em"}}>
                         <FormControl>
-                        <InputLabel>
-                            Пара
+                            <InputLabel>
+                                Пара
                         </InputLabel>
+                            <Controller
+                                as={
+                                    <Select value={lesson} onChange={e => setLesson(e.target.value)}>
+                                        {lessons.map((res) => (
+                                            <MenuItem key={res.value} value={res.value}>{res.label}</MenuItem>
+                                        ))}
+                                    </Select>
+                                }
+                                name="lessonUpdate"
+                                id="lessonUpdate"
+                                defaultValue={lessons[0].value}
+                                control={control}
+                            />
+                        </FormControl>
+                        <FormControl className={classes.select}>
+                            <InputLabel>
+                                Студент
+                        </InputLabel>
+                            <Controller
+                                as={
+                                    <Select value={studentsProps} onChange={e => setStudentsProps(e.target.value)}>
+                                        {studentsProps.map((res) => (
+                                            <MenuItem key={res.id} value={res.id}>{res.fullName}</MenuItem>
+                                        ))}
+                                    </Select>
+                                }
+                                name="student"
+                                id="student"
+                                control={control}
+                                defaultValue=" "
+                            />
+                        </FormControl>
+                    </div>
+                    <FormControl>
+                        <FormLabel>Відмітка</FormLabel>
                         <Controller
-                            as={
-                                <Select value={lesson} onChange={e => setLesson(e.target.value)}>
-                                    {lessons.map((res) => (
-                                        <MenuItem key={res.value} value={res.value}>{res.label}</MenuItem>
-                                    ))}
-                                </Select>
-                            }
-                            name="lessonUpdate"
-                            id="lessonUpdate"
-                            defaultValue={lessons[0].value}
-                            control={control}
+                        as=
+                        {
+                        <RadioGroup
+                            aria-label="gender"
+                            style={{ display: "block" }}
+                            name="mark"
+                        >
+                            <FormControlLabel
+                                value="present"
+                                control={<Radio/>}
+                                label="Присутній"
+                            />
+                            <FormControlLabel
+                                value="absent"
+                                control={<Radio/>}
+                                label="Відсутній"
+                            />
+                        </RadioGroup>
+                        }
+                        name="mark"
+                        control={control}
                         />
                     </FormControl>
-                    <FormControl className={classes.select}>
-                        <InputLabel>
-                            Студент
-                        </InputLabel>
-                        <Controller
-                            as={
-                                <Select value={studentsProps} onChange={e => setStudentsProps(e.target.value)}>
-                                    {studentsProps.map((res) => (
-                                        <MenuItem key={res.id} value={res.id}>{res.fullName}</MenuItem>
-                                    ))}
-                                </Select>
-                            }
-                            name="student"
-                            id="student"
-                            control={control}
-                            defaultValue=" "
-                        />
-                    </FormControl>
-                    </div>
-                    <div className={classes.mark}>
-                    <b>Присутній</b>
-                    <input type="radio" name="mark" value="present" ref={register}/>
-                    <b>Відстуній</b>
-                    <input type="radio" name="mark" value="absent" ref={register}/>
-                    </div>
                 </div>
-                <Button className={classes.btn} type="submit" color="primary" variant="outlined">Update</Button>
+                <Button type="submit" color="primary" variant="outlined">Відправити</Button>
             </form>
-            <h1 onClick={() => setMessage("")}>{message.message}</h1>
+            {valid !== "" ? <Snackbar open={alertopen} autoHideDuration={6000} onClose={handleClose}>
+                <Alert style={{ backgroundColor: "black" }} onClose={handleClose} severity="error">
+                    {valid}
+                </Alert>
+            </Snackbar> : message.message === "Помилка" ? <Snackbar open={alertopen} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="warning">
+                    {message.message}
+                </Alert>
+            </Snackbar> : message !== "" ? <Snackbar open={alertopen} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">
+                    {message.message}
+                </Alert>
+            </Snackbar> : <div></div>}
         </div>
     );
 }
